@@ -322,6 +322,23 @@ Discarded input sections
                 0x00000000       0x24 C:/Users/Lvl3Mage/Documents/DevkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/13.2.0/thumb/crtbegin.o
  .data.__dso_handle
                 0x00000000        0x4 C:/Users/Lvl3Mage/Documents/DevkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/13.2.0/thumb/crtbegin.o
+ .text          0x00000000      0x114 cameracontroller.o
+ .data          0x00000000        0x0 cameracontroller.o
+ .bss           0x00000000        0x0 cameracontroller.o
+ .debug_info    0x00000000     0x3506 cameracontroller.o
+ .debug_abbrev  0x00000000      0x930 cameracontroller.o
+ .debug_loclists
+                0x00000000      0x1d2 cameracontroller.o
+ .debug_aranges
+                0x00000000       0x20 cameracontroller.o
+ .debug_rnglists
+                0x00000000      0x14a cameracontroller.o
+ .debug_line    0x00000000      0x983 cameracontroller.o
+ .debug_str     0x00000000     0x2824 cameracontroller.o
+ .comment       0x00000000       0x24 cameracontroller.o
+ .debug_frame   0x00000000       0x84 cameracontroller.o
+ .ARM.attributes
+                0x00000000       0x27 cameracontroller.o
  .group         0x00000000        0xc main.o
  .data          0x00000000        0x0 utils.o
  .bss           0x00000000        0x0 utils.o
@@ -1796,7 +1813,7 @@ Linker script and memory map
                 0x02000b10                UpdateTime()
                 0x02000b68                MirrorX(unsigned char*, unsigned char*)
                 0x02000b84                MirrorY(unsigned char*, unsigned char*)
-                0x02000ba4                ShowWorld()
+                0x02000ba4                RenderWorld()
                 0x02000bfc                DefineTiles(std::vector<unsigned char*, std::allocator<unsigned char*> >)
                 0x02000c90                Init()
                 0x02000f4c                ValueNoise(float, float, float, int, int, int)
@@ -4194,28 +4211,28 @@ ARM.exidx       0x02014f10      0x238
  .debug_abbrev  0x00003102      0x31f C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(system.o)
  .debug_abbrev  0x00003421       0x12 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(biosCalls.o)
 
-.debug_line     0x00000000     0x740f
+.debug_line     0x00000000     0x7410
  *(.debug_line)
- .debug_line    0x00000000     0x12bf main.o
- .debug_line    0x000012bf      0x423 utils.o
- .debug_line    0x000016e2      0x5b2 world.o
- .debug_line    0x00001c94     0x1414 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(console.o)
- .debug_line    0x000030a8      0x399 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(keys.o)
- .debug_line    0x00003441      0x597 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(initSystem.o)
- .debug_line    0x000039d8       0x8f C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(securearea.o)
- .debug_line    0x00003a67      0x54c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(interrupts.o)
- .debug_line    0x00003fb3      0x23b C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(libnds_exit.arm.o)
- .debug_line    0x000041ee     0x14f5 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(fifosystem.o)
- .debug_line    0x000056e3       0xe8 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(mpu_setup.o)
- .debug_line    0x000057cb       0x74 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(IntrWait.o)
- .debug_line    0x0000583f       0x5c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(cpu_clock.o)
- .debug_line    0x0000589b       0x80 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(interruptDispatcher.o)
- .debug_line    0x0000591b       0x57 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(swiSoftReset.o)
- .debug_line    0x00005972      0x725 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(background.o)
- .debug_line    0x00006097      0x837 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(trig.o)
- .debug_line    0x000068ce      0x4b5 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(video.o)
- .debug_line    0x00006d83      0x4dc C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(system.o)
- .debug_line    0x0000725f      0x1b0 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .debug_line    0x00000000     0x12c0 main.o
+ .debug_line    0x000012c0      0x423 utils.o
+ .debug_line    0x000016e3      0x5b2 world.o
+ .debug_line    0x00001c95     0x1414 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(console.o)
+ .debug_line    0x000030a9      0x399 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(keys.o)
+ .debug_line    0x00003442      0x597 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(initSystem.o)
+ .debug_line    0x000039d9       0x8f C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(securearea.o)
+ .debug_line    0x00003a68      0x54c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(interrupts.o)
+ .debug_line    0x00003fb4      0x23b C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(libnds_exit.arm.o)
+ .debug_line    0x000041ef     0x14f5 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(fifosystem.o)
+ .debug_line    0x000056e4       0xe8 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(mpu_setup.o)
+ .debug_line    0x000057cc       0x74 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(IntrWait.o)
+ .debug_line    0x00005840       0x5c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(cpu_clock.o)
+ .debug_line    0x0000589c       0x80 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(interruptDispatcher.o)
+ .debug_line    0x0000591c       0x57 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(swiSoftReset.o)
+ .debug_line    0x00005973      0x725 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(background.o)
+ .debug_line    0x00006098      0x837 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(trig.o)
+ .debug_line    0x000068cf      0x4b5 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(video.o)
+ .debug_line    0x00006d84      0x4dc C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(system.o)
+ .debug_line    0x00007260      0x1b0 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(biosCalls.o)
 
 .debug_frame    0x00000000      0xb4c
  *(.debug_frame)
@@ -4233,29 +4250,29 @@ ARM.exidx       0x02014f10      0x238
  .debug_frame   0x00000998       0xbc C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(video.o)
  .debug_frame   0x00000a54       0xf8 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(system.o)
 
-.debug_str      0x00000000     0x8b1f
+.debug_str      0x00000000     0x8b24
  *(.debug_str)
- .debug_str     0x00000000     0x8b1f main.o
-                               0x685b (size before relaxing)
- .debug_str     0x00008b1f      0x44e utils.o
- .debug_str     0x00008b1f      0x762 world.o
- .debug_str     0x00008b1f     0x1282 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(console.o)
- .debug_str     0x00008b1f      0x420 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(keys.o)
- .debug_str     0x00008b1f      0xb81 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(initSystem.o)
- .debug_str     0x00008b1f      0x16e C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(securearea.o)
- .debug_str     0x00008b1f      0x496 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(interrupts.o)
- .debug_str     0x00008b1f      0x3e5 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(libnds_exit.arm.o)
- .debug_str     0x00008b1f      0x8a9 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(fifosystem.o)
- .debug_str     0x00008b1f       0x6c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(mpu_setup.o)
- .debug_str     0x00008b1f       0x6b C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(IntrWait.o)
- .debug_str     0x00008b1f       0x6c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(cpu_clock.o)
- .debug_str     0x00008b1f       0x76 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(interruptDispatcher.o)
- .debug_str     0x00008b1f       0x6f C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(swiSoftReset.o)
- .debug_str     0x00008b1f      0x7a2 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(background.o)
- .debug_str     0x00008b1f      0x2fc C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(trig.o)
- .debug_str     0x00008b1f      0xc53 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(video.o)
- .debug_str     0x00008b1f      0x798 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(system.o)
- .debug_str     0x00008b1f       0x6c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(biosCalls.o)
+ .debug_str     0x00000000     0x8b24 main.o
+                               0x6860 (size before relaxing)
+ .debug_str     0x00008b24      0x44e utils.o
+ .debug_str     0x00008b24      0x762 world.o
+ .debug_str     0x00008b24     0x1282 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(console.o)
+ .debug_str     0x00008b24      0x420 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(keys.o)
+ .debug_str     0x00008b24      0xb81 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(initSystem.o)
+ .debug_str     0x00008b24      0x16e C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(securearea.o)
+ .debug_str     0x00008b24      0x496 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(interrupts.o)
+ .debug_str     0x00008b24      0x3e5 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(libnds_exit.arm.o)
+ .debug_str     0x00008b24      0x8a9 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(fifosystem.o)
+ .debug_str     0x00008b24       0x6c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(mpu_setup.o)
+ .debug_str     0x00008b24       0x6b C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(IntrWait.o)
+ .debug_str     0x00008b24       0x6c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(cpu_clock.o)
+ .debug_str     0x00008b24       0x76 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(interruptDispatcher.o)
+ .debug_str     0x00008b24       0x6f C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(swiSoftReset.o)
+ .debug_str     0x00008b24      0x7a2 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(background.o)
+ .debug_str     0x00008b24      0x2fc C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(trig.o)
+ .debug_str     0x00008b24      0xc53 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(video.o)
+ .debug_str     0x00008b24      0x798 C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(system.o)
+ .debug_str     0x00008b24       0x6c C:/Users/Lvl3Mage/Documents/DevkitPro/libnds/lib\libnds9.a(biosCalls.o)
 
 .debug_loc
  *(.debug_loc)
@@ -4281,6 +4298,7 @@ ARM.exidx       0x02014f10      0x238
 LOAD C:/Users/Lvl3Mage/Documents/DevkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/13.2.0/../../../../arm-none-eabi/lib/thumb/ds_arm9_crt0.o
 LOAD C:/Users/Lvl3Mage/Documents/DevkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/13.2.0/thumb/crti.o
 LOAD C:/Users/Lvl3Mage/Documents/DevkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/13.2.0/thumb/crtbegin.o
+LOAD cameracontroller.o
 LOAD main.o
 LOAD utils.o
 LOAD world.o
