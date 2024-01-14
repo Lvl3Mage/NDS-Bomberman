@@ -1,281 +1,213 @@
 #include <nds.h>
 #include <stdio.h>
 #include <vector>
+#include <algorithm>
+#include "tiles.h"
+#include "world.h"
+#include "utils.h"
+#include "config.h"
+
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <vector>
+
+#include <memory>
+
 using namespace std;
+static u8*  tileMemory;
+static u16* mapMemory;
 
-u8 black_bg[64] =
-{
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0
-};
+//Camera
+int camX=0;
+int camY=0;
+const int camWidth = 32;
+const int camHeight = 24;
 
-u8 wall[64]=
-{
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1
-};
+int WALL_TILES_INDEX;
 
-u8 wall_circle[64]=
-{
-    0,0,0,0,0,0,0,0,
-    0,0,0,1,1,0,0,0,
-    0,0,1,1,1,1,0,0,
-    0,1,1,1,1,1,1,0,
-    0,1,1,1,1,1,1,0,
-    0,0,1,1,1,1,0,0,
-    0,0,0,1,1,0,0,0,
-    0,0,0,0,0,0,0,0
-};
-
-u8 pacman[64]=
-{
-    0,0,0,3,3,0,0,0,
-    0,3,3,3,3,3,0,0,
-    0,3,0,3,3,3,0,0,
-    3,3,3,0,0,0,0,0,
-    3,3,3,0,0,0,0,0,
-    0,3,3,3,3,3,0,0,
-    0,3,3,3,3,3,0,0,
-    0,0,0,3,3,0,0,0
-};
-
-u8 ghost[64]=
-{
-    0,0,0,4,4,0,0,0,
-    0,0,4,4,4,4,0,0,
-    0,4,4,4,4,4,4,0,
-    0,4,0,4,4,0,4,0,
-    0,4,4,4,4,4,4,0,
-    0,4,4,4,4,4,4,0,
-    0,4,4,4,4,4,4,0,
-    0,4,0,4,4,0,4,0
-};
-
-u8 coin[64]=
-{
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,
-    0,0,0,2,2,0,0,0,
-    0,0,2,2,2,2,0,0,
-    0,0,2,2,2,2,0,0,
-    0,0,0,2,2,0,0,0,
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0
-};
-
-
-// u16 mapData[768] =
-// {
-// 	X,X,X,X, X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X, X,X,X,X,X,
-// 	X,5,5,5, X,5,5,5,X,5,5,5,5,5,5,5,5,5,5,5,5,5,X,5,5,5,5, 5,5,5,5,X,
-// 	X,5,X,5, X,5,2,5,X,5,X,X,X,X,X,5,X,X,X,X,X,5,X,5,2,5,X, X,5,2,5,X,
-//     X,5,X,5, X,5,5,5,5,5,5,5,X,5,5,5,5,5,X,5,5,5,5,5,5,5,X, X,5,5,5,X,
-
-//     X,5,X,5, X,X,X,5,X,5,X,5,X,5,X,X,X,5,X,5,X,5,X,5,X,X,X, X,X,5,X,X,
-//     X,5,X,5, X,5,5,5,X,5,X,5,X,5,X,0,X,5,X,5,X,5,X,5,5,5,X, 5,5,5,5,X,
-//     X,5,X,5, X,5,2,5,X,5,X,5,X,5,X,X,X,5,X,5,X,5,X,5,2,5,X, 5,X,X,5,X,
-//     X,5,X,5, X,5,5,5,X,5,X,5,5,5,5,5,5,5,5,5,X,5,X,5,5,5,X, 5,5,X,5,X,
-
-//     X,5,X,5, X,X,X,X,X,5,X,5,X,X,X,X,X,X,X,5,X,5,X,X,X,X,X, 5,X,X,5,X,
-//     X,5,X,5, X,5,5,5,5,X,5,5,5,5,5,5,5,5,5,5,X,5,5,5,5,5,X, 5,0,0,5,X,
-//     X,5,X,5, X,5,X,X,X,X,X,5,X,X,X,0,X,X,X,5,X,X,X,X,X,5,X, 5,0,0,5,X,
-//     X,5,5,5, 5,5,5,5,5,5,5,5,X,0,0,4,0,0,X,5,5,5,5,5,5,5,5, 5,5,5,5,X,
-
-//     X,5,X,5, X,5,X,X,X,X,X,5,X,X,X,X,X,X,X,5,X,X,X,X,X,5,X, 0,0,0,0,X,
-//     X,5,X,5, X,5,5,5,5,X,5,5,5,5,5,5,5,5,5,5,X,5,5,5,5,5,X, 0,0,0,0,X,
-//     X,5,X,5, X,X,X,X,X,5,X,5,X,X,X,X,X,X,X,5,X,5,X,X,X,X,X, 0,0,0,0,X,
-//     X,5,X,5, X,5,5,5,X,5,X,5,5,5,5,5,5,5,5,5,X,5,X,5,5,5,X, 0,0,0,0,X,
-
-//     X,5,X,5, X,5,2,5,X,5,X,5,X,5,X,X,X,5,X,5,X,5,X,5,2,5,X, 0,0,0,0,X,
-//     X,5,X,5, X,5,5,5,X,5,X,5,X,5,X,0,X,5,X,5,X,5,X,5,5,5,X, 0,0,0,0,X,
-//     X,5,X,5, X,X,X,5,X,5,X,5,X,5,X,X,X,5,X,5,X,5,X,5,X,X,X, 0,0,0,0,X,
-//     X,5,X,5, X,5,5,5,5,5,5,5,X,5,5,5,5,5,X,5,5,5,5,5,5,5,X, 0,0,0,0,X,
-
-//     X,5,X,5, X,5,X,5,X,5,X,5,5,5,X,5,X,5,5,5,X,5,X,5,X,5,X, 0,0,0,0,X,
-//     X,5,X,5, X,5,X,5,X,5,X,X,X,X,X,3,X,X,X,X,X,5,X,5,X,5,X, 0,0,0,0,X,
-// 	X,5,5,5, X,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,X, 0,0,0,0,X,
-//     X,X,X,X, X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X, X,X,X,X,X
-// };
-u16 mapData[768] =
-{
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,2,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,2,9,9, 9,9,2,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,2,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,2,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-
-    9,9,9,9, 9,9,2,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,2,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,3,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,
-    9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9
-};
-int CoordToIndex(int x, int y){
-	return y*32 + x;
-}
-int* IndexToCoord(int index){
-	int* coord = new int[2]{index % 24,index / 24};
-	return coord;
-}
-int SearchedVal = 21;
-int PassableVal[2] = {5,0};
-// int PassableValLen = 2;
-bool FindPathToValue(int* searchMap, int x, int y, int searchVal){
-	if(searchMap[CoordToIndex(x,y)] == searchVal){return true;}
-	searchMap[CoordToIndex(x,y)] = SearchedVal;
-	int coord[2];
-	for(int i=-1; i <= 1; i++){
-		coord[0] = x+i;
-		if(coord[0] < 0 || coord[0] >= 24){
-			continue;
-		}
-		for(int j = -1; j <= 1; j++){
-			coord[1] = y+j;
-			if(coord[1] < 0 || coord[1] >= 24 || (j == 0 && i == 0)){
-				continue;
-			}
-			int val = searchMap[CoordToIndex(coord[0],coord[1])];
-			for(int passIndex = 0; passIndex < sizeof(PassableVal) / sizeof(PassableVal[0]); passIndex++){
-				if(val == PassableVal[passIndex]){
-					bool pathFound = FindPathToValue(searchMap ,coord[0], coord[1], searchVal);
-					if(pathFound){
-						return true;
-					}
-					break;
-				}
-			}
-		}
+unique_ptr<World> world;
+float worldTime = 0;
+void UpdateTime(){
+	worldTime+=0.1;
+	if(world == nullptr){
+		return;
 	}
-	return false;
+	world->MarchWorldData(50 + round(25*sin(worldTime)), WALL_TILES_INDEX);
 }
-int* CopyMap(){
-	int* mapCopy = new int[24*32];
-	for(int i=0; i < 768; i++){
-		mapCopy[i] = mapData[i];
+void MirrorX(u8* tile, u8* target){	
+	for(int i = 0; i < 64; i++){
+		int x = i % 8;
+		int y = i / 8;
+		int invertedIndex = y*8 + (7-x);
+		target[invertedIndex] = tile[i];
 	}
-	return mapCopy;
 }
-void GenerateCell(int* generationMap, int x, int y){
-
-	int coord[2];
-	if(mapData[CoordToIndex(x,y)] == 9){
-		bool pathFound = true;
-		for(int i=-1; i <= 1; i++){
-			coord[0] = x+i;
-			if(coord[0] < 0 || coord[0] >= 24){
-				continue;
-			}
-			for(int j = -1; j <= 1; j++){
-				coord[1] = y+j;
-				if(coord[1] < 0 || coord[1] >= 24 || (j == 0 && i == 0)){
-					continue;
-				}
-				int* searchMap = CopyMap();
-				if(!FindPathToValue(searchMap,coord[0], coord[1], 3)){
-					pathFound = false;
-					break;
-				}
-				delete searchMap;
-			}
-		}
-		mapData[CoordToIndex(x,y)] = pathFound ? X : 5;
+void MirrorY(u8* tile, u8* target){	
+	for(int i = 0; i < 64; i++){
+		int x = i % 8;
+		int y = i / 8;
+		int invertedIndex = (7-y)*8 + x;
+		target[invertedIndex] = tile[i];
 	}
-	generationMap[CoordToIndex(x,y)] = 1;
-	// mapData[CoordToIndex(x,y)] = 5;
-
-	coord[0] = x;
-	coord[1] = y;
-	// if(coord[1] <0){
-	// 	return;
-	// }
-	// GenerateCell(generationMap,coord[0], coord[1]);
-	for(int i=-1; i <= 1; i++){
-		coord[0] = x+i;
-		if(coord[0] < 0 || coord[0] >= 32){
-			continue;
-		}
-		for(int j = -1; j <= 1; j++){
-			coord[1] = y+j;
-			if(coord[1] < 0 || coord[1] >= 24 || (j == 0 && i == 0)){
-				continue;
-			}
-
-			if(generationMap[CoordToIndex(coord[0], coord[1])] == 0){
-				GenerateCell(generationMap, coord[0], coord[1]);
-			}
+}
+void RenderWorld()
+{
+	for (int screenY = 0; screenY < camHeight; screenY++)
+	{
+		for (int screenX = 0; screenX < camWidth; screenX++)
+		{
+			int coordX = screenX+camX;
+			int coordY = screenY+camY;
+			int pos_mapMemory = (camHeight-1-screenY) * camWidth + screenX; //y coord inverted
+			mapMemory[pos_mapMemory] = world->GetWorldAt(coordX,W_SIZE-1-coordY); // world sampling inverted
 		}
 	}
 }
-int main( void )
-{
-	int* mapCopy = new int[24*32];
-	GenerateCell(mapCopy, 14, 21);
 
-	// mapData[CoordToIndex(14,21)] = 5;
-	int row,col,pos_mapMemory,pos_mapData;
+int definedTiles = 0;
+int DefineTiles(vector<u8*> tiles){
+	for(int i = 0; i < tiles.size(); i++){
+		u8* tile = tiles[i]; 
+		dmaCopy(tile, tileMemory + definedTiles*64,  64);
+		definedTiles++;
+	}
+	return definedTiles - tiles.size();//returns first tile index
+}
+void Init(){
+	consoleDemoInit();
+
+	irqEnable(IRQ_TIMER0);
+	irqSet(IRQ_TIMER0, UpdateTime);
+	TIMER_DATA(0) = 62259;
+	TIMER_CR (0) = TIMER_DIV_1024 | TIMER_ENABLE | TIMER_IRQ_REQ;
 
 	REG_POWERCNT = (vu16) POWER_ALL_2D;
 	REG_DISPCNT  = MODE_0_2D | DISPLAY_BG0_ACTIVE ;
 	VRAM_A_CR    = VRAM_ENABLE | VRAM_A_MAIN_BG ;
 	BGCTRL [0]   = BG_32x32 | BG_COLOR_256 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
 
-	static u8*  tileMemory = (u8*)  BG_TILE_RAM(1);
-	static u16* mapMemory  = (u16*) BG_MAP_RAM(0);
+	tileMemory = (u8*)  BG_TILE_RAM(1);
+	mapMemory  = (u16*) BG_MAP_RAM(0);
 
+
+	//Main BG
 	BG_PALETTE[0]=RGB15(5,5,5);
-	BG_PALETTE[1]=RGB15(10,10,31);
-	BG_PALETTE[2]=RGB15(31,15,10);
-	BG_PALETTE[3]=RGB15(31,31,0);
-	BG_PALETTE[4]=RGB15(10,31,10);
+	//Wall colors
+	BG_PALETTE[1]=RGB15(17,15,12);
+	BG_PALETTE[2]=RGB15(12,10,7);
+	BG_PALETTE[3]=RGB15(10,9,7);
 
-	dmaCopy(black_bg,    tileMemory     ,  sizeof(black_bg));     // 0
-	dmaCopy(wall,        tileMemory + 64,  sizeof(wall));         // 1
-	dmaCopy(wall_circle, tileMemory + 128, sizeof(wall_circle));  // 2
-	dmaCopy(pacman,      tileMemory + 192, sizeof(pacman));       // 3
-	dmaCopy(ghost,       tileMemory + 256, sizeof(ghost));        // 4
-	dmaCopy(coin,        tileMemory + 320, sizeof(coin));         // 5
 
-	pos_mapData = 0;
-	for(row=0;row<24;row++)
-		for(col=0;col<32;col++)
-		{
-			pos_mapMemory            = row*32+col;
-			mapMemory[pos_mapMemory] = mapData[pos_mapData];
-			pos_mapData ++;
-	    }
+	// BG_PALETTE[3]=RGB15(31,31,0);
+	// BG_PALETTE[4]=RGB15(10,31,10);
+
+	u8 corner2[64];
+	MirrorX(w_corner1,corner2);
+	u8 corner3[64];
+	MirrorY(corner2,corner3);
+	u8 corner4[64];
+	MirrorY(w_corner1,corner4);
+
+	u8 w_halfV_inv[64];
+	MirrorX(w_halfV,w_halfV_inv);
+
+	u8 w_halfH_inv[64];
+	MirrorY(w_halfH,w_halfH_inv);
+
+	u8 w_fullCorner2[64];
+	MirrorX(w_fullCorner1,w_fullCorner2);
+	u8 w_fullCorner3[64];
+	MirrorY(w_fullCorner2,w_fullCorner3);
+	u8 w_fullCorner4[64];
+	MirrorY(w_fullCorner1,w_fullCorner4);
+
+
+	u8 w_path_inv[64];
+	MirrorY(w_path,w_path_inv);
+
+	WALL_TILES_INDEX = DefineTiles({
+		w_empty,     corner2, w_corner1, w_halfH,
+		corner3,     w_halfV_inv, w_path_inv, w_fullCorner4,
+		corner4,     w_path, w_halfV, w_fullCorner3, 
+		w_halfH_inv, w_fullCorner1, w_fullCorner2, w_full,
+	});
+}
+float ValueNoise(float scale, float x, float y, int repeatDistance, int min, int max){
+	float localX = x/scale;
+	float localY = y/scale;
+
+
+	int squareCoordX = floor(localX);
+	int squareCoordY = floor(localY);
+
+	float xTravel = localX - squareCoordX;
+	float yTravel = localY - squareCoordY;
+
+
+	//Coordinates of the square vertecies
+	int posIndex = squareCoordX+squareCoordY*repeatDistance;
+	int posIndexT = squareCoordX+(squareCoordY+1)*repeatDistance;
+	int posIndexR = squareCoordX+1+squareCoordY*repeatDistance;
+	int posIndexTR = squareCoordX+1+(squareCoordY+1)*repeatDistance;
+
+
+	float bottom = lerp((float)RandomRangeSeeded(min,max,posIndex),(float)RandomRangeSeeded(min,max,posIndexR), xTravel);
+	float top = lerp((float)RandomRangeSeeded(min,max,posIndexT),(float)RandomRangeSeeded(min,max,posIndexTR), xTravel);
+	return lerp(top,bottom,yTravel);
+}
+template<int WorldSize>
+void GenerateWorldData(int dataTarget[WorldSize+1][WorldSize+1]){
+	for(int i=0; i<WorldSize+1;i++){
+		for(int j=0; j<WorldSize+1;j++){
+			// float x = i/2.0;
+			// float y = j/2.0;
+			// dataTarget[i][j] = round(i%5)-1;
+			// dataTarget[i][j] = RandomRange(-1,2);
+			// dataTarget[i][j] = round(cos(2*x+sin(y))*sin(cos(x)+y/2.0));
+			//circles
+			// int size = 26;
+			// int x = i%size - size/2;
+			// int y = j%size - size/2;
+			// dataTarget[i][j] = round(sqrt(x*x+y*y)-size/3 );
+			dataTarget[i][j] = ValueNoise(12,i,j,W_SIZE+1,0,100);
+		}
+	}
+}
+
+
+int main()
+{
+	srand(static_cast<unsigned int>(time(0)));
+	Init();
+	iprintf("\x1b[12;2H Loading...");
+	int worldData[W_SIZE+1][W_SIZE+1] = {0};
+	GenerateWorldData<W_SIZE>(worldData);
+
+	world = make_unique<World>(worldData);
+	world->MarchWorldData(50,WALL_TILES_INDEX);
+
+	iprintf("\x1b[12;2H Loaded!   ");
 
 	while(1)
 	{
+		u32 key;
+		scanKeys();
+		key = keysDown();
+		if (key & KEY_RIGHT) {
+			camX ++;
+		}
+		if (key & KEY_LEFT){
+			camX --;
+		}
+		if (key & KEY_UP) {
+			camY ++;
+		}
+		if (key & KEY_DOWN){
+			camY --;
+		}
+		RenderWorld();
 		swiWaitForVBlank();
 	}
 }
+
