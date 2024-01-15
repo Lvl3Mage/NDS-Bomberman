@@ -13,5 +13,6 @@ public:
     Terrain(int data[W_SIZE+1][W_SIZE+1]);
     void MarchTerrainData(int surfaceLevel);
     int GetTerrainAt(int x, int y);
+    bool IsTerrainAt(int x, int y);
 };
 #endif

@@ -24,10 +24,6 @@ using namespace std;
 static u8*  tileMemory;
 static u16* mapMemory;
 
-//Camera
-int targetX = 150;
-int targetY = 150;
-
 int WALL_TILES_INDEX;
 
 unique_ptr<Scene> scene;
@@ -36,10 +32,22 @@ void UpdateTime(){
 	ellapsedTime+=0.1;
 	if(scene==nullptr){return;}
 	scene->UpdateTime(ellapsedTime);
-	// if(terrain == nullptr){
-	// 	return;
-	// }
-	// terrain->MarchTerrainData(50 + round(25*sin(worldTime)), WALL_TILES_INDEX);
+	
+	// scene->terrain->MarchTerrainData(50 + round(25*sin(ellapsedTime)));
+}
+void ApplyPalette(vector<u8*> tiles, int start){//0 - 10 to start - start+10, 10> - 0>
+
+	for(int i = 0; i < tiles.size(); i++){
+		u8* tile = tiles[i];
+		for(int j = 0; j < 64; j++){
+			if(tile[j] < 10){
+				tile[j] = start + tile[j];
+			}
+			else{
+				tile[j] = tile[j] - 10;
+			}
+		}
+	}
 }
 void MirrorX(u8* tile, u8* target){	
 	for(int i = 0; i < 64; i++){
@@ -84,6 +92,7 @@ void Init(){
 	mapMemory  = (u16*) BG_MAP_RAM(0);
 
 
+
 	//Main BG
 	BG_PALETTE[0]=RGB15(5,5,5);
 	//Wall colors
@@ -92,8 +101,16 @@ void Init(){
 	BG_PALETTE[3]=RGB15(10,9,7);
 
 
-	BG_PALETTE[4]=RGB15(31,31,0);
+	BG_PALETTE[4]=RGB15(10,10,10);
+	BG_PALETTE[5]=RGB15(15,15,15);
+	BG_PALETTE[6]=RGB15(19,19,19);
+	BG_PALETTE[7]=RGB15(15,10,7);
+	BG_PALETTE[8]=RGB15(10,4,2);
+	BG_PALETTE[9]=RGB15(0,0,0);
 	// BG_PALETTE[4]=RGB15(10,31,10);
+
+	ApplyPalette({w_empty, w_full, w_corner1, w_halfH, w_halfV, w_fullCorner1},0);
+
 
 	static u8 corner2[64];
 	MirrorX(w_corner1,corner2);
@@ -119,15 +136,19 @@ void Init(){
 	static u8 w_path_inv[64];
 	MirrorY(w_path,w_path_inv);
 
+	ApplyPalette({dwarf},4);
+
 	//This took forever to figure out but it seems that dmaCopy works asyncrounosly? 
 	//if the variables that you pass in are not static and aren't allocated on the heap they go out of scope before it executes
 	//I swear this was not like this before but like this it will stay
-	WALL_TILES_INDEX = DefineTiles({
-		w_empty,     corner2, w_corner1, w_halfH,
-		corner3,     w_halfV_inv, w_path_inv, w_fullCorner4,
-		corner4,     w_path, w_halfV, w_fullCorner3, 
-		w_halfH_inv, w_fullCorner1, w_fullCorner2, w_full,
+	DefineTiles({
+		w_empty,     corner3, corner4, w_halfH_inv,
+		corner2,     w_halfV_inv, w_path, w_fullCorner1,
+		w_corner1,     w_path_inv, w_halfV, w_fullCorner2, 
+		w_halfH, w_fullCorner4, w_fullCorner3, w_full,
 	});
+	//15
+	DefineTiles({dwarf});
 }
 template<int TerrainSize>
 void GenerateTerrainData(int dataTarget[TerrainSize+1][TerrainSize+1]){
@@ -154,23 +175,9 @@ int main()
 	iprintf("\x1b[12;2H Loaded!   ");
 	while(1)
 	{
-		u32 key;
-		scanKeys();
-		key = keysCurrent();
-		if (key & KEY_RIGHT) {
-			targetX ++;
-		}
-		if (key & KEY_LEFT){
-			targetX --;
-		}
-		if (key & KEY_UP) {
-			targetY ++;
-		}
-		if (key & KEY_DOWN){
-			targetY --;
-		}
 		scene->Update();
-		scene->players[0]->x = targetX;
+
+		iprintf("\x1b[12;2H Player coords %d, %d", scene->players[0]->x, scene->players[0]->y);
 		// cameraController->Update(scene);
 		// cameraController->Render(terrain);
 		swiWaitForVBlank();

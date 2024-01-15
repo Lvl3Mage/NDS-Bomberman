@@ -12,16 +12,29 @@ CameraController::CameraController(u16* attachedMapMemory, int posX, int posY){
 	camX = posX;
 	camY = posY;
 }
+int CameraController::ScreenCoordToIndex(int x, int y){
+	return (camHeight - 1 - y) * camWidth + x;
+}
 void CameraController::Render(Scene* scene){
+	//World Pass
 	for (int screenY = 0; screenY < camHeight; screenY++)
 	{
 		for (int screenX = 0; screenX < camWidth; screenX++)
 		{
 			int worldCoordX = screenX+camX;
 			int worldCoordY = screenY+camY;
-			int pos_mapMemory = (camHeight-1-screenY) * camWidth + screenX; //y coord inverted
-			screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoordX,W_SIZE-1-worldCoordY); // world sampling inverted
+			int pos_mapMemory = ScreenCoordToIndex(screenX,screenY); //y coord inverted
+			screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoordX,worldCoordY); // world sampling inverted
 		}
+	}
+
+	//Player pass
+	vector<shared_ptr<Player>> players = scene->players;
+	for(int i = 0; i < players.size(); i++){
+		int screenCoordX = players[i]->x-camX;
+		int screenCoordY = players[i]->y-camY;
+		int pos_mapMemory = ScreenCoordToIndex(screenCoordX,screenCoordY);
+		screenMemory[pos_mapMemory] = players[i]->activeTile;
 	}
 }
 void CameraController::ClampPosition(){

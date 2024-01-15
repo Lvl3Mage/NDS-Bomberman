@@ -26,8 +26,9 @@ class CameraController
 	float lerpEndTime;
 	void ClampPosition();
 	void SetPosition(int targetX, int targetY);
-	int targetPlayerIndex;
+	int targetPlayerIndex = 1;
 	void UpdateTarget(Scene* scene);
+	int ScreenCoordToIndex(int x, int y);
 public:
 
 	CameraController(u16* attachedMapMemory, int posX, int posY);
