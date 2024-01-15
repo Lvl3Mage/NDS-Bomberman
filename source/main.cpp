@@ -43,21 +43,18 @@ void UpdateTime(){
 }
 void MirrorX(u8* tile, u8* target){	
 	for(int i = 0; i < 64; i++){
-
-		target[i] = tile[i];
-		// int x = i % 8;
-		// int y = i / 8;
-		// int invertedIndex = y*8 + (7-x);
-		// target[invertedIndex] = tile[i];
+		int x = i % 8;
+		int y = i / 8;
+		int invertedIndex = y*8 + (7-x);
+		target[invertedIndex] = tile[i];
 	}
 }
 void MirrorY(u8* tile, u8* target){	
 	for(int i = 0; i < 64; i++){
-		target[i] = tile[i];
-		// int x = i % 8;
-		// int y = i / 8;
-		// int invertedIndex = (7-y)*8 + x;
-		// target[invertedIndex] = tile[i];
+		int x = i % 8;
+		int y = i / 8;
+		int invertedIndex = (7-y)*8 + x;
+		target[invertedIndex] = tile[i];
 	}
 }
 
@@ -98,48 +95,39 @@ void Init(){
 	BG_PALETTE[4]=RGB15(31,31,0);
 	// BG_PALETTE[4]=RGB15(10,31,10);
 
-	u8 a[64] =
-	{
-	    1,1,1,1,1,1,1,1,
-	    1,1,1,2,1,1,1,1,
-	    1,1,2,2,2,1,1,1,
-	    1,2,2,2,2,2,1,1,
-	    1,1,1,2,1,2,1,1,
-	    1,1,1,1,2,1,2,2,
-	    1,1,1,1,1,2,2,2,
-	    1,1,1,1,1,1,2,1
-	};
-	// u8 corner2[64];
-	// MirrorX(w_corner1,corner2);
-	// u8 corner3[64];
-	// MirrorY(corner2,corner3);
-	// u8 corner4[64];
-	// MirrorY(w_corner1,corner4);
+	static u8 corner2[64];
+	MirrorX(w_corner1,corner2);
+	static u8 corner3[64];
+	MirrorY(corner2,corner3);
+	static u8 corner4[64];
+	MirrorY(w_corner1,corner4);
 
-	// u8 w_halfV_inv[64];
-	// MirrorX(w_halfV,w_halfV_inv);
+	static u8 w_halfV_inv[64];
+	MirrorX(w_halfV,w_halfV_inv);
 
-	// u8 w_halfH_inv[64];
-	// MirrorY(w_halfH,w_halfH_inv);
+	static u8 w_halfH_inv[64];
+	MirrorY(w_halfH,w_halfH_inv);
 
-	// u8 w_fullCorner2[64];
-	// MirrorX(w_fullCorner1,w_fullCorner2);
-	// u8 w_fullCorner3[64];
-	// MirrorY(w_fullCorner2,w_fullCorner3);
-	// u8 w_fullCorner4[64];
-	// MirrorY(w_fullCorner1,w_fullCorner4);
+	static u8 w_fullCorner2[64];
+	MirrorX(w_fullCorner1,w_fullCorner2);
+	static u8 w_fullCorner3[64];
+	MirrorY(w_fullCorner2,w_fullCorner3);
+	static u8 w_fullCorner4[64];
+	MirrorY(w_fullCorner1,w_fullCorner4);
 
 
-	// u8 w_path_inv[64];
-	// MirrorY(w_path,w_path_inv);
-	// DefineTiles({a});
-	dmaCopy(a,         tileMemory       ,  sizeof(a));
-	// WALL_TILES_INDEX = DefineTiles({
-	// 	w_empty,     corner2, w_corner1, w_halfH,
-	// 	corner3,     w_halfV_inv, w_path_inv, w_fullCorner4,
-	// 	corner4,     w_path, w_halfV, w_fullCorner3, 
-	// 	w_halfH_inv, w_fullCorner1, w_fullCorner2, w_full,
-	// });
+	static u8 w_path_inv[64];
+	MirrorY(w_path,w_path_inv);
+
+	//This took forever to figure out but it seems that dmaCopy works asyncrounosly? 
+	//if the variables that you pass in are not static and aren't allocated on the heap they go out of scope before it executes
+	//I swear this was not like this before but like this it will stay
+	WALL_TILES_INDEX = DefineTiles({
+		w_empty,     corner2, w_corner1, w_halfH,
+		corner3,     w_halfV_inv, w_path_inv, w_fullCorner4,
+		corner4,     w_path, w_halfV, w_fullCorner3, 
+		w_halfH_inv, w_fullCorner1, w_fullCorner2, w_full,
+	});
 }
 template<int TerrainSize>
 void GenerateTerrainData(int dataTarget[TerrainSize+1][TerrainSize+1]){

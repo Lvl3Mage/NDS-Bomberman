@@ -20,7 +20,7 @@ void SquareMarch(int data[TerrainSize+1][TerrainSize+1], int target[TerrainSize]
 	for(int i=0; i<TerrainSize;i++){
 		for(int j=0; j<TerrainSize;j++){
 			uint tileIndex = GetSquareConfig<TerrainSize>(data, i, j, surfaceLevel);
-			target[i][j] = 0;
+			target[i][j] = tileIndex;
 		}
 	}
 }

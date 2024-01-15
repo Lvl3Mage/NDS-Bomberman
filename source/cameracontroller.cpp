@@ -20,7 +20,7 @@ void CameraController::Render(Scene* scene){
 			int worldCoordX = screenX+camX;
 			int worldCoordY = screenY+camY;
 			int pos_mapMemory = (camHeight-1-screenY) * camWidth + screenX; //y coord inverted
-			screenMemory[pos_mapMemory] = 0;//scene->terrain->GetTerrainAt(worldCoordX,W_SIZE-1-worldCoordY); // world sampling inverted
+			screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoordX,W_SIZE-1-worldCoordY); // world sampling inverted
 		}
 	}
 }
