@@ -3,7 +3,13 @@
 #include <vector>
 #include <algorithm>
 #include "tiles.h"
-#include "world.h"
+
+#include "scene.h"
+
+#include "terrain.h"
+#include "player.h"
+#include "cameracontroller.h"
+
 #include "utils.h"
 #include "config.h"
 
@@ -19,49 +25,39 @@ static u8*  tileMemory;
 static u16* mapMemory;
 
 //Camera
-int camX=0;
-int camY=0;
-const int camWidth = 32;
-const int camHeight = 24;
+int targetX = 150;
+int targetY = 150;
 
 int WALL_TILES_INDEX;
 
-unique_ptr<World> world;
-float worldTime = 0;
+unique_ptr<Scene> scene;
+float ellapsedTime = 0;
 void UpdateTime(){
-	worldTime+=0.1;
-	if(world == nullptr){
-		return;
-	}
-	world->MarchWorldData(50 + round(25*sin(worldTime)), WALL_TILES_INDEX);
+	ellapsedTime+=0.1;
+	if(scene==nullptr){return;}
+	scene->UpdateTime(ellapsedTime);
+	// if(terrain == nullptr){
+	// 	return;
+	// }
+	// terrain->MarchTerrainData(50 + round(25*sin(worldTime)), WALL_TILES_INDEX);
 }
 void MirrorX(u8* tile, u8* target){	
 	for(int i = 0; i < 64; i++){
-		int x = i % 8;
-		int y = i / 8;
-		int invertedIndex = y*8 + (7-x);
-		target[invertedIndex] = tile[i];
+
+		target[i] = tile[i];
+		// int x = i % 8;
+		// int y = i / 8;
+		// int invertedIndex = y*8 + (7-x);
+		// target[invertedIndex] = tile[i];
 	}
 }
 void MirrorY(u8* tile, u8* target){	
 	for(int i = 0; i < 64; i++){
-		int x = i % 8;
-		int y = i / 8;
-		int invertedIndex = (7-y)*8 + x;
-		target[invertedIndex] = tile[i];
-	}
-}
-void RenderWorld()
-{
-	for (int screenY = 0; screenY < camHeight; screenY++)
-	{
-		for (int screenX = 0; screenX < camWidth; screenX++)
-		{
-			int coordX = screenX+camX;
-			int coordY = screenY+camY;
-			int pos_mapMemory = (camHeight-1-screenY) * camWidth + screenX; //y coord inverted
-			mapMemory[pos_mapMemory] = world->GetWorldAt(coordX,W_SIZE-1-coordY); // world sampling inverted
-		}
+		target[i] = tile[i];
+		// int x = i % 8;
+		// int y = i / 8;
+		// int invertedIndex = (7-y)*8 + x;
+		// target[invertedIndex] = tile[i];
 	}
 }
 
@@ -99,77 +95,56 @@ void Init(){
 	BG_PALETTE[3]=RGB15(10,9,7);
 
 
-	// BG_PALETTE[3]=RGB15(31,31,0);
+	BG_PALETTE[4]=RGB15(31,31,0);
 	// BG_PALETTE[4]=RGB15(10,31,10);
 
-	u8 corner2[64];
-	MirrorX(w_corner1,corner2);
-	u8 corner3[64];
-	MirrorY(corner2,corner3);
-	u8 corner4[64];
-	MirrorY(w_corner1,corner4);
+	u8 a[64] =
+	{
+	    1,1,1,1,1,1,1,1,
+	    1,1,1,2,1,1,1,1,
+	    1,1,2,2,2,1,1,1,
+	    1,2,2,2,2,2,1,1,
+	    1,1,1,2,1,2,1,1,
+	    1,1,1,1,2,1,2,2,
+	    1,1,1,1,1,2,2,2,
+	    1,1,1,1,1,1,2,1
+	};
+	// u8 corner2[64];
+	// MirrorX(w_corner1,corner2);
+	// u8 corner3[64];
+	// MirrorY(corner2,corner3);
+	// u8 corner4[64];
+	// MirrorY(w_corner1,corner4);
 
-	u8 w_halfV_inv[64];
-	MirrorX(w_halfV,w_halfV_inv);
+	// u8 w_halfV_inv[64];
+	// MirrorX(w_halfV,w_halfV_inv);
 
-	u8 w_halfH_inv[64];
-	MirrorY(w_halfH,w_halfH_inv);
+	// u8 w_halfH_inv[64];
+	// MirrorY(w_halfH,w_halfH_inv);
 
-	u8 w_fullCorner2[64];
-	MirrorX(w_fullCorner1,w_fullCorner2);
-	u8 w_fullCorner3[64];
-	MirrorY(w_fullCorner2,w_fullCorner3);
-	u8 w_fullCorner4[64];
-	MirrorY(w_fullCorner1,w_fullCorner4);
+	// u8 w_fullCorner2[64];
+	// MirrorX(w_fullCorner1,w_fullCorner2);
+	// u8 w_fullCorner3[64];
+	// MirrorY(w_fullCorner2,w_fullCorner3);
+	// u8 w_fullCorner4[64];
+	// MirrorY(w_fullCorner1,w_fullCorner4);
 
 
-	u8 w_path_inv[64];
-	MirrorY(w_path,w_path_inv);
-
-	WALL_TILES_INDEX = DefineTiles({
-		w_empty,     corner2, w_corner1, w_halfH,
-		corner3,     w_halfV_inv, w_path_inv, w_fullCorner4,
-		corner4,     w_path, w_halfV, w_fullCorner3, 
-		w_halfH_inv, w_fullCorner1, w_fullCorner2, w_full,
-	});
+	// u8 w_path_inv[64];
+	// MirrorY(w_path,w_path_inv);
+	// DefineTiles({a});
+	dmaCopy(a,         tileMemory       ,  sizeof(a));
+	// WALL_TILES_INDEX = DefineTiles({
+	// 	w_empty,     corner2, w_corner1, w_halfH,
+	// 	corner3,     w_halfV_inv, w_path_inv, w_fullCorner4,
+	// 	corner4,     w_path, w_halfV, w_fullCorner3, 
+	// 	w_halfH_inv, w_fullCorner1, w_fullCorner2, w_full,
+	// });
 }
-float ValueNoise(float scale, float x, float y, int repeatDistance, int min, int max){
-	float localX = x/scale;
-	float localY = y/scale;
-
-
-	int squareCoordX = floor(localX);
-	int squareCoordY = floor(localY);
-
-	float xTravel = localX - squareCoordX;
-	float yTravel = localY - squareCoordY;
-
-
-	//Coordinates of the square vertecies
-	int posIndex = squareCoordX+squareCoordY*repeatDistance;
-	int posIndexT = squareCoordX+(squareCoordY+1)*repeatDistance;
-	int posIndexR = squareCoordX+1+squareCoordY*repeatDistance;
-	int posIndexTR = squareCoordX+1+(squareCoordY+1)*repeatDistance;
-
-
-	float bottom = lerp((float)RandomRangeSeeded(min,max,posIndex),(float)RandomRangeSeeded(min,max,posIndexR), xTravel);
-	float top = lerp((float)RandomRangeSeeded(min,max,posIndexT),(float)RandomRangeSeeded(min,max,posIndexTR), xTravel);
-	return lerp(top,bottom,yTravel);
-}
-template<int WorldSize>
-void GenerateWorldData(int dataTarget[WorldSize+1][WorldSize+1]){
-	for(int i=0; i<WorldSize+1;i++){
-		for(int j=0; j<WorldSize+1;j++){
-			// float x = i/2.0;
-			// float y = j/2.0;
-			// dataTarget[i][j] = round(i%5)-1;
-			// dataTarget[i][j] = RandomRange(-1,2);
-			// dataTarget[i][j] = round(cos(2*x+sin(y))*sin(cos(x)+y/2.0));
-			//circles
-			// int size = 26;
-			// int x = i%size - size/2;
-			// int y = j%size - size/2;
-			// dataTarget[i][j] = round(sqrt(x*x+y*y)-size/3 );
+template<int TerrainSize>
+void GenerateTerrainData(int dataTarget[TerrainSize+1][TerrainSize+1]){
+	for(int i=0; i<TerrainSize+1;i++){
+		for(int j=0; j<TerrainSize+1;j++){
 			dataTarget[i][j] = ValueNoise(12,i,j,W_SIZE+1,0,100);
 		}
 	}
@@ -180,33 +155,36 @@ int main()
 {
 	srand(static_cast<unsigned int>(time(0)));
 	Init();
-	iprintf("\x1b[12;2H Loading...");
-	int worldData[W_SIZE+1][W_SIZE+1] = {0};
-	GenerateWorldData<W_SIZE>(worldData);
+	iprintf("\x1b[12;2H Loading... %d", WALL_TILES_INDEX);
 
-	world = make_unique<World>(worldData);
-	world->MarchWorldData(50,WALL_TILES_INDEX);
+	
+	
+	scene = make_unique<Scene>(mapMemory);
+
+
 
 	iprintf("\x1b[12;2H Loaded!   ");
-
 	while(1)
 	{
 		u32 key;
 		scanKeys();
-		key = keysDown();
+		key = keysCurrent();
 		if (key & KEY_RIGHT) {
-			camX ++;
+			targetX ++;
 		}
 		if (key & KEY_LEFT){
-			camX --;
+			targetX --;
 		}
 		if (key & KEY_UP) {
-			camY ++;
+			targetY ++;
 		}
 		if (key & KEY_DOWN){
-			camY --;
+			targetY --;
 		}
-		RenderWorld();
+		scene->Update();
+		scene->players[0]->x = targetX;
+		// cameraController->Update(scene);
+		// cameraController->Render(terrain);
 		swiWaitForVBlank();
 	}
 }
