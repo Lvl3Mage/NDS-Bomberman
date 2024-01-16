@@ -8,34 +8,51 @@
 #include <algorithm>
 using namespace std;
 
-void Player::ClampPosition(){
-	x = clamp(x, 0, W_SIZE);
-	y = clamp(y, 0, W_SIZE);
-}
+
 Player::Player(int startX, int startY){
-	x = startX;
-	y = startY;
+	position = Vector2(startX, startY);
 }
-void Player::Update(Scene* scene){
+void Player::UpdateMovement(Scene* scene){
+
 	u32 key;
 	scanKeys();
 	key = keysCurrent();
-	int newPosX = x;
-	int newPosY = y;
 	if (key & KEY_RIGHT) {
-		newPosX ++;
+		moveDelta.x = 1;
 	}
 	if (key & KEY_LEFT){
-		newPosX --;
+		moveDelta.x = -1;
 	}
+	
 	if (key & KEY_UP) {
-		newPosY ++;
+		moveDelta.y = 1;
 	}
 	if (key & KEY_DOWN){
-		newPosY --;
+		moveDelta.y = -1;
 	}
-	if(!scene->terrain->IsTerrainAt(newPosX, newPosY)){
-		x = newPosX;
-		y = newPosY;
+	
+
+
+
+	if(scene->sceneTime < lastMoveTime + moveCooldown){
+		return;
 	}
+	lastMoveTime = scene->sceneTime;
+
+	Vector2 nextPos = Vector2(moveDelta.x + position.x, moveDelta.y + position.y);
+	nextPos = scene->LoopCoord(nextPos);
+
+	if(!scene->terrain->IsTerrainAt(nextPos.x, position.y)){
+		position.x = nextPos.x;
+	}
+	moveDelta.x = 0;
+
+	if(!scene->terrain->IsTerrainAt(position.x, nextPos.y)){
+		position.y = nextPos.y;
+	}
+	moveDelta.y = 0;
+	
+}
+void Player::Update(Scene* scene){
+
 }

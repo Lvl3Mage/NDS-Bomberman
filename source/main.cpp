@@ -14,7 +14,7 @@
 #include "config.h"
 
 #include <cstdlib>
-#include <ctime>
+#include <time.h>
 #include <cmath>
 #include <vector>
 
@@ -24,15 +24,17 @@ using namespace std;
 static u8*  tileMemory;
 static u16* mapMemory;
 
+# define TIMER_SPEED ( BUS_CLOCK /1024)
+
 int WALL_TILES_INDEX;
 
 unique_ptr<Scene> scene;
-float ellapsedTime = 0;
+uint ticks = 0;
 void UpdateTime(){
-	ellapsedTime+=0.1;
+	ticks += timerElapsed (0);
+	float ellapsedTime = ((float)ticks) / (float)TIMER_SPEED;
 	if(scene==nullptr){return;}
 	scene->UpdateTime(ellapsedTime);
-	
 	// scene->terrain->MarchTerrainData(50 + round(25*sin(ellapsedTime)));
 }
 void ApplyPalette(vector<u8*> tiles, int start){//0 - 10 to start - start+10, 10> - 0>
@@ -78,10 +80,10 @@ int DefineTiles(vector<u8*> tiles){
 void Init(){
 	consoleDemoInit();
 
-	irqEnable(IRQ_TIMER0);
-	irqSet(IRQ_TIMER0, UpdateTime);
-	TIMER_DATA(0) = 62259;
-	TIMER_CR (0) = TIMER_DIV_1024 | TIMER_ENABLE | TIMER_IRQ_REQ;
+	// irqEnable(IRQ_TIMER0);
+	// irqSet(IRQ_TIMER0, UpdateTime);
+	// TIMER_DATA(0) = 62259;
+	// TIMER_CR (0) = TIMER_DIV_1024 | TIMER_ENABLE | TIMER_IRQ_REQ;
 
 	REG_POWERCNT = (vu16) POWER_ALL_2D;
 	REG_DISPCNT  = MODE_0_2D | DISPLAY_BG0_ACTIVE ;
@@ -109,7 +111,7 @@ void Init(){
 	BG_PALETTE[9]=RGB15(0,0,0);
 	// BG_PALETTE[4]=RGB15(10,31,10);
 
-	ApplyPalette({w_empty, w_full, w_corner1, w_halfH, w_halfV, w_fullCorner1},0);
+	ApplyPalette({w_empty, w_full, w_corner1, w_halfH, w_halfV, w_fullCorner1,w_path},0);
 
 
 	static u8 corner2[64];
@@ -164,22 +166,21 @@ int main()
 {
 	srand(static_cast<unsigned int>(time(0)));
 	Init();
-	iprintf("\x1b[12;2H Loading... %d", WALL_TILES_INDEX);
+	iprintf("\x1b[12;2H Loading...");
 
 	
 	
 	scene = make_unique<Scene>(mapMemory);
 
+	iprintf("\x1b[12;2H Loaded!    ");
 
-
-	iprintf("\x1b[12;2H Loaded!   ");
+	timerStart (0 , ClockDivider_1024 , 0 , NULL ) ; 
 	while(1)
 	{
+    	consoleClear();
+		UpdateTime();
+		// scene->cameraController->Render(scene.get());
 		scene->Update();
-
-		iprintf("\x1b[12;2H Player coords %d, %d", scene->players[0]->x, scene->players[0]->y);
-		// cameraController->Update(scene);
-		// cameraController->Render(terrain);
 		swiWaitForVBlank();
 	}
 }

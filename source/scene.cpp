@@ -30,6 +30,8 @@ Scene::Scene(u16* associatedMemory){
 	terrain->MarchTerrainData(50);
 
 	players.push_back(make_shared<Player>(128,128));
+
+	players.push_back(make_shared<Player>(40,40));
 	//add players
 
 	cameraController = make_unique<CameraController>(associatedMemory, 0,0);
@@ -40,8 +42,33 @@ void Scene::UpdateTime(float newTime){
 }
 
 void Scene::Update(){
+	players[activePlayerIndex]->UpdateMovement(this);
+
+	for(int i = 0; i < players.size(); i++){
+		players[i]->Update(this);
+	}
+
+	activePlayerIndex = 1;//(int)round(sceneTime/5) % 2;
+
+
+
 	cameraController->Update(this);
 	cameraController->Render(this);
-	players[activePlayerIndex]->Update(this);
 
+}
+
+Vector2 Scene::LoopCoord(Vector2 coord){
+	if(coord.x < 0 ){
+		coord.x = W_SIZE-1;
+	}
+	if(coord.x > W_SIZE-1 ){
+		coord.x = 0;
+	}
+	if(coord.y < 0 ){
+		coord.y = W_SIZE-1;
+	}
+	if(coord.y > W_SIZE-1 ){
+		coord.y = 0;
+	}
+	return coord;
 }

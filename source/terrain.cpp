@@ -38,7 +38,7 @@ int Terrain::GetTerrainAt(int x, int y){
 }
 
 bool Terrain::IsTerrainAt(int x, int y){
-	return terrainTiles[x][y] != 0;;
+	return terrainTiles[x][y] != 0;
 }
 void Terrain::MarchTerrainData(int surfaceLevel){
 	SquareMarch<W_SIZE>(terrainData, terrainTiles, surfaceLevel);

@@ -9,6 +9,7 @@ class Scene;
 #include "terrain.h"
 #include "cameracontroller.h"
 #include "player.h"
+#include "vector2.h"
 using namespace std;
 class Scene
 {
@@ -22,5 +23,7 @@ public:
 
 	void UpdateTime(float newTime);
 	void Update();
+
+	Vector2 LoopCoord(Vector2 coord);
 };
 #endif

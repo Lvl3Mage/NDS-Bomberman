@@ -7,6 +7,7 @@ class CameraController;
 #include <vector>
 #include <memory>
 #include "scene.h"
+#include "vector2.h"
 #include "config.h"
 #include "terrain.h"
 
@@ -15,20 +16,22 @@ using namespace std;
 class CameraController
 {
 	u16* screenMemory;
-	int camX=0;
-	int camY=0;
+	Vector2 position = Vector2(0,0);
 	const int camWidth = 32;
 	const int camHeight = 24;
-	const float camLerpTime = 1;
+	const float camLerpTime = 1.5;
 
+	Vector2 lerpStart = Vector2(0,0);
 	int lerpStartX, lerpStartY;
 	float lerpStartTime;
 	float lerpEndTime;
 	void ClampPosition();
-	void SetPosition(int targetX, int targetY);
+	Vector2 GetCornerPosition();
+	bool IsCoordInFrame(Vector2 coord);
 	int targetPlayerIndex = 1;
 	void UpdateTarget(Scene* scene);
 	int ScreenCoordToIndex(int x, int y);
+	void SetPosition(Vector2 newPos);
 public:
 
 	CameraController(u16* attachedMapMemory, int posX, int posY);
