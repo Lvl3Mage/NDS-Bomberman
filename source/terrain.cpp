@@ -1,5 +1,6 @@
 #include "terrain.h"
 #include "config.h"
+#include "vector2.h"
 
 
 template<int TerrainSize>
@@ -33,12 +34,12 @@ Terrain::Terrain(int data[W_SIZE+1][W_SIZE+1]){
 		}
 	}
 }
-int Terrain::GetTerrainAt(int x, int y){
-	return terrainTiles[x][y];
+int Terrain::GetTerrainAt(Vector2 coord){
+	return terrainTiles[coord.x][coord.y];
 }
 
-bool Terrain::IsTerrainAt(int x, int y){
-	return terrainTiles[x][y] != 0;
+bool Terrain::IsTerrainAt(Vector2 coord){
+	return terrainTiles[coord.x][coord.y] != 0;
 }
 void Terrain::MarchTerrainData(int surfaceLevel){
 	SquareMarch<W_SIZE>(terrainData, terrainTiles, surfaceLevel);

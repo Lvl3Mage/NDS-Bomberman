@@ -16,7 +16,7 @@ CameraController::CameraController(u16* attachedMapMemory, int posX, int posY){
 	screenMemory = attachedMapMemory;
 	position = Vector2(posX, posY);
 }
-int CameraController::ScreenCoordToIndex(int x, int y){
+int CameraController::ScreenCoordToIndex(int x, int y){ //y coord inverted
 	return (camHeight - 1 - y) * camWidth + x;
 }
 bool CameraController::IsCoordInFrame(Vector2 coord){
@@ -29,10 +29,9 @@ void CameraController::Render(Scene* scene){
 	{
 		for (int screenX = 0; screenX < camWidth; screenX++)
 		{
-			int worldCoordX = screenX+screenPos.x;
-			int worldCoordY = screenY+screenPos.y;
-			int pos_mapMemory = ScreenCoordToIndex(screenX,screenY); //y coord inverted
-			screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoordX,worldCoordY); // world sampling inverted
+			Vector2 worldCoord = Vector2(screenX+screenPos.x, screenY+screenPos.y);
+			int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
+			screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoord);
 		}
 	}
 
@@ -78,7 +77,6 @@ void CameraController::Update(Scene* scene){
 		const float slope = 1.8;
 		const float tPow = pow(t,slope);
 		t = tPow / (tPow + pow(1-t,slope));
-		// t = t/(1*(1-t)+1);
 		int posX = round(lerp(lerpStart.x, targetPlayer->position.x, t));
 		int posY = round(lerp(lerpStart.y, targetPlayer->position.y, t));
 		SetPosition(Vector2(posX,posY));

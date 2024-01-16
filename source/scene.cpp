@@ -42,18 +42,21 @@ void Scene::UpdateTime(float newTime){
 }
 
 void Scene::Update(){
+	deltaTime = sceneTime - lastFrameTime;
 	players[activePlayerIndex]->UpdateMovement(this);
 
 	for(int i = 0; i < players.size(); i++){
 		players[i]->Update(this);
 	}
 
-	activePlayerIndex = 1;//(int)round(sceneTime/5) % 2;
+	activePlayerIndex = 1;
 
 
 
 	cameraController->Update(this);
 	cameraController->Render(this);
+
+	lastFrameTime = sceneTime;
 
 }
 
@@ -71,4 +74,12 @@ Vector2 Scene::LoopCoord(Vector2 coord){
 		coord.y = 0;
 	}
 	return coord;
+}
+bool Scene::IsPlayerCollision(Vector2 coord){
+	for(shared_ptr<Player> player : players){
+		if(player->position.x == coord.x && player->position.y == coord.y){
+			return true;
+		}
+	}
+	return false;
 }

@@ -42,12 +42,12 @@ void Player::UpdateMovement(Scene* scene){
 	Vector2 nextPos = Vector2(moveDelta.x + position.x, moveDelta.y + position.y);
 	nextPos = scene->LoopCoord(nextPos);
 
-	if(!scene->terrain->IsTerrainAt(nextPos.x, position.y)){
+	if(!scene->terrain->IsTerrainAt(Vector2(nextPos.x, position.y))){
 		position.x = nextPos.x;
 	}
 	moveDelta.x = 0;
 
-	if(!scene->terrain->IsTerrainAt(position.x, nextPos.y)){
+	if(!scene->terrain->IsTerrainAt(Vector2(position.x, nextPos.y))){
 		position.y = nextPos.y;
 	}
 	moveDelta.y = 0;

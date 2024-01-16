@@ -3,6 +3,7 @@
 #include <nds.h>
 #include <vector>
 #include "config.h"
+#include "vector2.h"
 
 class Terrain
 {
@@ -12,7 +13,7 @@ class Terrain
 public:
     Terrain(int data[W_SIZE+1][W_SIZE+1]);
     void MarchTerrainData(int surfaceLevel);
-    int GetTerrainAt(int x, int y);
-    bool IsTerrainAt(int x, int y);
+    int GetTerrainAt(Vector2 coord);
+    bool IsTerrainAt(Vector2 coord);
 };
 #endif
