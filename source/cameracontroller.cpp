@@ -46,16 +46,7 @@ void CameraController::Render(Scene* scene){
 
 	
 
-	//Projectile pass
-	vector<shared_ptr<Projectile>> projectiles = scene->projectiles;
-	for(int i = 0; i < projectiles.size(); i++){
-		int screenCoordX = projectiles[i]->position.x - screenPos.x;
-		int screenCoordY = projectiles[i]->position.y - screenPos.y;
-		if(IsCoordInFrame(Vector2(screenCoordX, screenCoordY))){
-			int pos_mapMemory = ScreenCoordToIndex(screenCoordX,screenCoordY);
-			screenMemory[pos_mapMemory] = projectiles[i]->activeTile;
-		}
-	}
+	
 
 	//Explosive pass
 	vector<shared_ptr<Explosion>> explosions = scene->explosions;
@@ -69,17 +60,28 @@ void CameraController::Render(Scene* scene){
 				for (int screenX = max(screenCoordX - explosion->radius,0); screenX < min(screenCoordX + explosion->radius,camWidth); screenX++)
 				{
 					Vector2 worldCoord = Vector2(screenX+screenPos.x, screenY+screenPos.y);
-					Vector2 delta = Vector2(worldCoord.x - explosion->position.x, worldCoord.y - explosion->position.y);
-					if(sqrt(delta.x*delta.x + delta.y*delta.y) < explosion->radius){
-						int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
-						int tileOffset =  explosion->tileOffset;
-						screenMemory[pos_mapMemory] = explosionTiles + tileOffset;
+					if(!scene->terrain->IsTerrainAt(worldCoord)){
+						Vector2 delta = Vector2(worldCoord.x - explosion->position.x, worldCoord.y - explosion->position.y);
+						if(sqrt(delta.x*delta.x + delta.y*delta.y) < explosion->radius){
+							int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
+							int tileOffset =  explosion->tileOffset;
+							screenMemory[pos_mapMemory] = explosionTiles + tileOffset;
+						}
 					}
 				}
 			}
 		}
 	}
-
+	//Projectile pass
+	vector<shared_ptr<Projectile>> projectiles = scene->projectiles;
+	for(int i = 0; i < projectiles.size(); i++){
+		int screenCoordX = projectiles[i]->position.x - screenPos.x;
+		int screenCoordY = projectiles[i]->position.y - screenPos.y;
+		if(IsCoordInFrame(Vector2(screenCoordX, screenCoordY))){
+			int pos_mapMemory = ScreenCoordToIndex(screenCoordX,screenCoordY);
+			screenMemory[pos_mapMemory] = projectiles[i]->activeTile;
+		}
+	}
 	//World Pass Walls
 	for (int screenY = 0; screenY < camHeight; screenY++)
 	{
