@@ -12,32 +12,61 @@ using namespace std;
 Player::Player(int startX, int startY){
 	position = Vector2(startX, startY);
 }
-void Player::UpdateMovement(Scene* scene){
+void Player::ActiveUpdate(Scene* scene){
 
+	Vector2 actionDir = Vector2(0,0);
 	u32 key;
 	scanKeys();
 	key = keysCurrent();
 	if (key & KEY_RIGHT) {
-		moveDelta.x = 1;
+		actionDir.x = 1;
 	}
 	if (key & KEY_LEFT){
-		moveDelta.x = -1;
+		actionDir.x = -1;
 	}
 	
 	if (key & KEY_UP) {
-		moveDelta.y = 1;
+		actionDir.y = 1;
 	}
 	if (key & KEY_DOWN){
-		moveDelta.y = -1;
+		actionDir.y = -1;
 	}
 	
+	if(key & KEY_A){//movement
+		selectedActionType = 0;
+	}
+	if(key & KEY_L){//grenades
+		selectedActionType = 1;
+	}
 
+
+	switch(selectedActionType){
+		case 0:
+			ProcessMovement(scene, actionDir);
+			break;
+		case 1:
+			ProcessAttack(scene,actionDir);
+			break;
+	}
+}
+void Player::ProcessAttack(Scene* scene, Vector2 actionDir){
+
+}
+void Player::ProcessMovement(Scene* scene, Vector2 actionDir){
+	moveDelta = actionDir;
 
 
 	if(scene->sceneTime < lastMoveTime + moveCooldown){
 		return;
 	}
+	if(remainingMovement <= 0){
+		return;
+	}
+	if(actionDir.x == 0 && actionDir.y == 0){
+		return;	
+	}
 	lastMoveTime = scene->sceneTime;
+	remainingMovement--;
 
 	Vector2 nextPos = Vector2(moveDelta.x + position.x, moveDelta.y + position.y);
 	nextPos = scene->LoopCoord(nextPos);
@@ -51,8 +80,20 @@ void Player::UpdateMovement(Scene* scene){
 		position.y = nextPos.y;
 	}
 	moveDelta.y = 0;
-	
 }
-void Player::Update(Scene* scene){
+void Player::PassiveUpdate(Scene* scene){
 
+}
+void Player::ResetTurn(){
+	remainingActions = 1;
+	remainingMovement = 30;
+}
+char* Player::GetSelectedActionName(){
+	switch(selectedActionType){
+		case 0:
+			return "Move";
+		case 1:
+			return "Grenades";
+	}
+	return "Other";
 }

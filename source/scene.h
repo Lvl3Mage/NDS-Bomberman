@@ -8,12 +8,16 @@ class Scene;
 #include "config.h"
 #include "terrain.h"
 #include "cameracontroller.h"
+#include "projectile.h"
 #include "player.h"
 #include "vector2.h"
 using namespace std;
 class Scene
 {
+	float turnTimeLeft;
 	float lastFrameTime;
+	void SwitchNextTurn();
+	void LogSceneInfo();
 public:
 	Scene(u16* associatedMemory);
 	vector<shared_ptr<Player>> players;

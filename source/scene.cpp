@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "scene.h"
 #include "terrain.h"
 #include "player.h"
@@ -7,6 +8,7 @@
 #include <memory>
 #include <cmath>
 #include <algorithm>
+#include <string>
 
 using namespace std;
 
@@ -29,29 +31,56 @@ Scene::Scene(u16* associatedMemory){
 	terrain = make_unique<Terrain>(terrainData);
 	terrain->MarchTerrainData(50);
 
-	players.push_back(make_shared<Player>(128,128));
+	players.push_back(make_shared<Player>(198,198));
 
 	players.push_back(make_shared<Player>(40,40));
 	//add players
 
-	cameraController = make_unique<CameraController>(associatedMemory, 0,0);
+	cameraController = make_unique<CameraController>(associatedMemory,  128,128);
+
+	SwitchNextTurn();
 }
 
 void Scene::UpdateTime(float newTime){
 	sceneTime = newTime;
 }
+void Scene::SwitchNextTurn(){
 
-void Scene::Update(){
-	deltaTime = sceneTime - lastFrameTime;
-	players[activePlayerIndex]->UpdateMovement(this);
-
-	for(int i = 0; i < players.size(); i++){
-		players[i]->Update(this);
+	activePlayerIndex += 1;
+	if(activePlayerIndex >= players.size()){
+		activePlayerIndex = 0;
 	}
 
-	activePlayerIndex = 1;
+	turnTimeLeft = 20;
+	players[activePlayerIndex]->ResetTurn();
+}
+void Scene::LogSceneInfo(){
+	iprintf("\x1b[2;2H Player %d's turn!", activePlayerIndex+1);
+	iprintf("\x1b[4;2H Time left: %d seconds", (int)ceil(turnTimeLeft));
+	iprintf("\x1b[6;2H Remaining movement: %d cells", players[activePlayerIndex]->remainingMovement);
+	iprintf("\x1b[8;2H Remaining actions: %d", players[activePlayerIndex]->remainingActions);
+	iprintf("\x1b[10;2H Selected action: %s", players[activePlayerIndex]->GetSelectedActionName());
+}
+void Scene::Update(){
+	deltaTime = sceneTime - lastFrameTime;
 
 
+	turnTimeLeft -= deltaTime;
+
+	if(turnTimeLeft <= 0){
+		SwitchNextTurn();
+	}
+
+
+
+	players[activePlayerIndex]->ActiveUpdate(this);
+
+	for(int i = 0; i < players.size(); i++){
+		players[i]->PassiveUpdate(this);
+	}
+
+
+	LogSceneInfo();
 
 	cameraController->Update(this);
 	cameraController->Render(this);

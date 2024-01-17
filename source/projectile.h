@@ -17,5 +17,6 @@ public:
 	float velocity;
 	void Update(Scene* scene);
 	void OnCollision(Scene* scene);
+	u8 activeTile;
 };
 #endif

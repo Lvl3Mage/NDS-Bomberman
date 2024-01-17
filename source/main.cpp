@@ -166,20 +166,17 @@ int main()
 {
 	srand(static_cast<unsigned int>(time(0)));
 	Init();
-	iprintf("\x1b[12;2H Loading...");
+	iprintf("\x1b[12;2H Loading Scene...");
 
-	
-	
 	scene = make_unique<Scene>(mapMemory);
 
-	iprintf("\x1b[12;2H Loaded!    ");
+	iprintf("\x1b[12;2H Loaded!         ");
 
 	timerStart (0 , ClockDivider_1024 , 0 , NULL ) ; 
 	while(1)
 	{
     	consoleClear();
 		UpdateTime();
-		// scene->cameraController->Render(scene.get());
 		scene->Update();
 		swiWaitForVBlank();
 	}
