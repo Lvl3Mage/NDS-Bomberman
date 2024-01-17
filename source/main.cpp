@@ -33,6 +33,8 @@ int terrainTiles2;
 int playerTiles;
 int grenadeTiles;
 int mudBallTiles;
+int explosionTiles;
+int playerDeadTiles;
 unique_ptr<Scene> scene;
 uint ticks = 0;
 void UpdateTime(){
@@ -53,6 +55,13 @@ void ApplyPalette(vector<u8*> tiles, int start){//0 - 10 to start - start+10, 10
 			else{
 				tile[j] = tile[j] - 10;
 			}
+		}
+	}
+}
+void Clone(vector<u8*> tiles, vector<u8*> targets){
+	for(int i = 0; i < tiles.size(); i++){
+		for(int j = 0; j < 64; j++){
+			targets[i][j] = tiles[i][j];
 		}
 	}
 }
@@ -107,9 +116,9 @@ void Init(){
 	BG_PALETTE[2]=RGB15(12,10,7);
 	BG_PALETTE[3]=RGB15(10,9,7);
 
-	BG_PALETTE[4]=RGB15(14,12,9);
-	BG_PALETTE[5]=RGB15(9,7,5);
-	BG_PALETTE[6]=RGB15(7,6,5);
+	BG_PALETTE[4]=RGB15(17,15,12);
+	BG_PALETTE[5]=RGB15(8,6,4);
+	BG_PALETTE[6]=RGB15(10,9,7);
 
 
 	BG_PALETTE[7]=RGB15(10,10,10);
@@ -127,8 +136,19 @@ void Init(){
 	BG_PALETTE[16]=RGB15(17, 15, 12);
 	BG_PALETTE[17]=RGB15(12, 10, 7);
 	BG_PALETTE[18]=RGB15(10, 9, 7);
+	//Fire
 
-	ApplyPalette({w_empty, w_full, w_corner1, w_halfH, w_halfV, w_fullCorner1,w_path},0);
+	BG_PALETTE[19]=RGB15(22, 13, 8);
+	BG_PALETTE[20]=RGB15(22, 18, 10);
+	BG_PALETTE[21]=RGB15(22, 22, 15);
+
+	//
+	
+	BG_PALETTE[22]=RGB15(10,10,10);
+	BG_PALETTE[23]=RGB15(15,15,15);
+	BG_PALETTE[24]=RGB15(19,19,19);
+	BG_PALETTE[25]=RGB15(15,14,13);
+	BG_PALETTE[26]=RGB15(10,8,8);
 
 
 	static u8 corner2[64];
@@ -156,6 +176,32 @@ void Init(){
 	MirrorY(w_path,w_path_inv);
 
 
+	static u8 heavy_w_empty[64];
+	static u8 heavy_w_full[64];
+	static u8 heavy_w_corner1[64];
+	static u8 heavy_corner2[64];
+	static u8 heavy_corner3[64];
+	static u8 heavy_corner4[64];
+	static u8 heavy_w_halfV[64];
+	static u8 heavy_w_halfV_inv[64];
+	static u8 heavy_w_halfH[64];
+	static u8 heavy_w_halfH_inv[64];
+	static u8 heavy_w_fullCorner1[64];
+	static u8 heavy_w_fullCorner2[64];
+	static u8 heavy_w_fullCorner3[64];
+	static u8 heavy_w_fullCorner4[64];
+	static u8 heavy_w_path[64];
+	static u8 heavy_w_path_inv[64];
+	Clone(
+		{w_empty,w_full,w_corner1,corner2,corner3,corner4,w_halfV,w_halfV_inv,w_halfH,w_halfH_inv,w_fullCorner1,w_fullCorner2,w_fullCorner3,w_fullCorner4,w_path,w_path_inv},
+		{heavy_w_empty,heavy_w_full,heavy_w_corner1,heavy_corner2,heavy_corner3,heavy_corner4,heavy_w_halfV,heavy_w_halfV_inv,heavy_w_halfH,heavy_w_halfH_inv,heavy_w_fullCorner1,heavy_w_fullCorner2,heavy_w_fullCorner3,heavy_w_fullCorner4,heavy_w_path,heavy_w_path_inv}
+	);
+
+	ApplyPalette({w_empty,w_full,w_corner1,corner2,corner3,corner4,w_halfV,w_halfV_inv,w_halfH,w_halfH_inv,w_fullCorner1,w_fullCorner2,w_fullCorner3,w_fullCorner4,w_path,w_path_inv},1);
+
+	ApplyPalette({heavy_w_empty,heavy_w_full,heavy_w_corner1,heavy_corner2,heavy_corner3,heavy_corner4,heavy_w_halfV,heavy_w_halfV_inv,heavy_w_halfH,heavy_w_halfH_inv,heavy_w_fullCorner1,heavy_w_fullCorner2,heavy_w_fullCorner3,heavy_w_fullCorner4,heavy_w_path,heavy_w_path_inv},4);
+	
+
 	//This took forever to figure out but it seems that dmaCopy works asyncrounosly? 
 	//if the variables that you pass in are not static and aren't allocated on the heap they go out of scope before it executes
 	//I swear this was not like this before but like this it will stay
@@ -165,6 +211,12 @@ void Init(){
 		w_corner1,     w_path_inv, w_halfV, w_fullCorner2, 
 		w_halfH, w_fullCorner4, w_fullCorner3, w_full,
 	});//15
+	terrainTiles2 = DefineTiles({
+		heavy_w_empty,     heavy_corner3, heavy_corner4, heavy_w_halfH_inv,
+		heavy_corner2,     heavy_w_halfV_inv, heavy_w_path, heavy_w_fullCorner1,
+		heavy_w_corner1,     heavy_w_path_inv, heavy_w_halfV, heavy_w_fullCorner2, 
+		heavy_w_halfH, heavy_w_fullCorner4, heavy_w_fullCorner3, heavy_w_full,
+	});
 
 
 	ApplyPalette({dwarf},7);
@@ -188,6 +240,16 @@ void Init(){
 
 
 	mudBallTiles = DefineTiles({mud_ball1, mud_ball2, mud_ball3, mud_ball4});
+
+	ApplyPalette({expl8, expl7, expl6, expl5, expl4, expl3, expl2, expl1},19);
+
+	explosionTiles = DefineTiles({expl8, expl7, expl6, expl5, expl4, expl3, expl2, expl1});
+
+
+	ApplyPalette({dwarf_dead},22);
+	
+
+	playerDeadTiles = DefineTiles({dwarf_dead});
 }
 
 

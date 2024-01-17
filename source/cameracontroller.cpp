@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "scene.h"
 #include "vector2.h"
+#include "tileconfig.h"
 #include <memory>
 #include <cmath>
 #include <algorithm>
@@ -22,16 +23,74 @@ int CameraController::ScreenCoordToIndex(int x, int y){ //y coord inverted
 bool CameraController::IsCoordInFrame(Vector2 coord){
 	return (coord.x >= 0) && (coord.x < camWidth) && (coord.y >= 0) && (coord.y < camHeight);
 }
+
+bool CameraController::IsCoordInFrame(Vector2 coord, int frameDistance){
+	return (coord.x >= -frameDistance) && (coord.x < camWidth+frameDistance) && (coord.y >= -frameDistance) && (coord.y < camHeight+frameDistance);
+}
 void CameraController::Render(Scene* scene){
 	Vector2 screenPos = GetCornerPosition();
-	//World Pass
+	//World Pass BG
 	for (int screenY = 0; screenY < camHeight; screenY++)
 	{
 		for (int screenX = 0; screenX < camWidth; screenX++)
 		{
 			Vector2 worldCoord = Vector2(screenX+screenPos.x, screenY+screenPos.y);
 			int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
-			screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoord);
+			if(!scene->terrain->IsTerrainAt(worldCoord)){
+				screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoord);
+			}
+		}
+	}
+
+	
+
+	//Projectile pass
+	vector<shared_ptr<Projectile>> projectiles = scene->projectiles;
+	for(int i = 0; i < projectiles.size(); i++){
+		int screenCoordX = projectiles[i]->position.x - screenPos.x;
+		int screenCoordY = projectiles[i]->position.y - screenPos.y;
+		if(IsCoordInFrame(Vector2(screenCoordX, screenCoordY))){
+			int pos_mapMemory = ScreenCoordToIndex(screenCoordX,screenCoordY);
+			screenMemory[pos_mapMemory] = projectiles[i]->activeTile;
+		}
+	}
+
+	//Explosive pass
+	vector<shared_ptr<Explosion>> explosions = scene->explosions;
+	for(int i = 0; i < explosions.size(); i++){
+		shared_ptr<Explosion> explosion = explosions[i];
+		int screenCoordX = explosion->position.x - screenPos.x;
+		int screenCoordY = explosion->position.y - screenPos.y;
+		if(IsCoordInFrame(Vector2(screenCoordX, screenCoordY),explosion->radius)){
+			for (int screenY = screenCoordY - explosion->radius; screenY < screenCoordY + explosion->radius; screenY++)
+			{
+				for (int screenX = screenCoordX - explosion->radius; screenX < screenCoordX + explosion->radius; screenX++)
+				{
+					Vector2 worldCoord = Vector2(screenX+screenPos.x, screenY+screenPos.y);
+					Vector2 delta = Vector2(worldCoord.x - explosion->position.x, worldCoord.y - explosion->position.y);
+					if(IsCoordInFrame(Vector2(screenX,screenY))){
+						if(sqrt(delta.x*delta.x + delta.y*delta.y) < explosion->radius){
+							int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
+							int tileOffset =  explosion->tileOffset;
+							screenMemory[pos_mapMemory] = explosionTiles + tileOffset;
+						}
+						
+					}
+				}
+			}
+		}
+	}
+
+	//World Pass BG
+	for (int screenY = 0; screenY < camHeight; screenY++)
+	{
+		for (int screenX = 0; screenX < camWidth; screenX++)
+		{
+			Vector2 worldCoord = Vector2(screenX+screenPos.x, screenY+screenPos.y);
+			int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
+			if(scene->terrain->IsTerrainAt(worldCoord)){
+				screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoord);
+			}
 		}
 	}
 
@@ -43,17 +102,6 @@ void CameraController::Render(Scene* scene){
 		if(IsCoordInFrame(Vector2(screenCoordX, screenCoordY))){
 			int pos_mapMemory = ScreenCoordToIndex(screenCoordX,screenCoordY);
 			screenMemory[pos_mapMemory] = players[i]->activeTile;
-		}
-	}
-
-	//Projectile pass
-	vector<shared_ptr<Projectile>> projectiles = scene->projectiles;
-	for(int i = 0; i < projectiles.size(); i++){
-		int screenCoordX = projectiles[i]->position.x - screenPos.x;
-		int screenCoordY = projectiles[i]->position.y - screenPos.y;
-		if(IsCoordInFrame(Vector2(screenCoordX, screenCoordY))){
-			int pos_mapMemory = ScreenCoordToIndex(screenCoordX,screenCoordY);
-			screenMemory[pos_mapMemory] = projectiles[i]->activeTile;
 		}
 	}
 }

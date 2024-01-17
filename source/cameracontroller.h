@@ -28,6 +28,7 @@ class CameraController
 	void ClampPosition();
 	Vector2 GetCornerPosition();
 	bool IsCoordInFrame(Vector2 coord);
+	bool IsCoordInFrame(Vector2 coord, int radius);
 	int targetPlayerIndex = 1;
 	void UpdateTarget(Scene* scene);
 	int ScreenCoordToIndex(int x, int y);

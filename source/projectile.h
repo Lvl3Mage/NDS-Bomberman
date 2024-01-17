@@ -15,9 +15,10 @@ class Projectile{
 	float terrainDamage;
 	int playerDamage;
 	int startTile;
+	bool causeExplosion;
 	int GetTileOffset();
 public:
-	Projectile(Vector2 pos, Vector2 dir, float vel, int _startTile, float spread, int _explosionRadius, int _terrainDamage, int _playerDamage);
+	Projectile(Vector2 pos, Vector2 dir, float vel, int _startTile, float spread, int _explosionRadius, float _terrainDamage, int _playerDamage, bool _causeExplosion);
 	Vector2 position = Vector2(0,0);
 	Vector2 direction = Vector2(0,0);
 	float trajectoryTangentX;

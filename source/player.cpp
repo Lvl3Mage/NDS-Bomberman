@@ -76,10 +76,10 @@ void Player::ProcessAttack(Scene* scene){
 	shared_ptr<Projectile> projectile;
 
 	if(selectedActionType == 1){
-		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, grenadeTiles, 0.3, 6, -1, 1);
+		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, grenadeTiles, 0.3, 6, -0.25, 1, true);
 	}
 	else if(selectedActionType == 2){
-		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, mudBallTiles, 0.1, 3, 1, 0);
+		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, mudBallTiles, 0.1, 3, 1, 0, false);
 	}
 
 	scene->AddProjectile(projectile);
@@ -145,5 +145,5 @@ void Player::Damage(int damage){
 	}
 }
 void Player::OnDeath(){
-
+	activeTile = playerDeadTiles;
 }

@@ -12,23 +12,35 @@
 
 using namespace std;
 
-
+Explosion::Explosion(Vector2 pos, int rad){
+	position = pos;
+	radius = rad;
+	tileOffset = 8;
+}
 template<int TerrainSize>
 void GenerateTerrainData(float dataTarget[TerrainSize+1][TerrainSize+1]){
 	for(int i=0; i<TerrainSize+1;i++){
 		for(int j=0; j<TerrainSize+1;j++){
-			dataTarget[i][j] = ValueNoise(12,i,j,W_SIZE+1,0,100)/100;
+			float weight = (ValueNoise(12,i,j,W_SIZE+1,0,100)/100); // 0-1
+			dataTarget[i][j] = weight; // 0 - 1
 		}
 	}
 }
 
-
+void Scene::UpdateExplosionData(){
+	for(int i=0; i<explosions.size();i++){
+		explosions[i]->tileOffset -=1;
+		if(explosions[i]->tileOffset == 0){
+			explosions.erase(explosions.begin()+i);
+		}
+	}
+}
 Scene::Scene(u16* associatedMemory){
 
 	float terrainData[W_SIZE+1][W_SIZE+1] = {0};
 	GenerateTerrainData<W_SIZE>(terrainData);
 
-	terrain = make_unique<Terrain>(terrainData, 0.5);
+	terrain = make_unique<Terrain>(terrainData, 0.5, 0.7, 0, 1);
 	terrain->MarchTerrainData();
 
 	players.push_back(make_shared<Player>(198,198));
@@ -69,6 +81,11 @@ void Scene::Update(){
 
 	if(turnTimeLeft <= 0){
 		NextTurn();
+	}
+
+	if(lastExplosionUpdateTime + explosionAnimTime < sceneTime){
+		lastExplosionUpdateTime = sceneTime;
+		UpdateExplosionData();
 	}
 
 
@@ -137,4 +154,7 @@ void Scene::RemoveProjectile(Projectile* projectile){//Not the best way to do th
 			return;
 		}
 	}
+}
+void Scene::AddExplosion(Vector2 position, int radius){
+	explosions.push_back(make_shared<Explosion>(position, radius));
 }

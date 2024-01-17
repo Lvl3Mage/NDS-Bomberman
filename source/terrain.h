@@ -14,11 +14,13 @@ class Terrain
 
 public:
     float surfaceLevel;
-    Terrain(float data[W_SIZE+1][W_SIZE+1], float _surfaceLevel);
+    float heavyLevel;
+    float minTerrain, maxTerrain;
+    Terrain(float data[W_SIZE+1][W_SIZE+1], float _surfaceLevel, float _heavyLevel, float _minTerrain, float _maxTerrain);
     void MarchTerrainData();
     void MarchTerrainDataRegion(Vector2 start, Vector2 end);
     int GetTerrainAt(Vector2 coord);
     bool IsTerrainAt(Vector2 coord);
-    void TerraformCircle(Scene* scene, Vector2 center, int radius, int amount );
+    void TerraformCircle(Scene* scene, Vector2 center, int radius, float amount );
 };
 #endif
