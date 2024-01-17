@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+// #include <random>
 
 using namespace std;
 
@@ -17,7 +18,11 @@ int RandomRangeSeeded(int min, int max, int seed){
 	srand(static_cast<unsigned int>(seed));
 	return min + rand() % (max + 1);
 }
-
+// float RandomRangeSeeded(float min, float max, int seed){//Waay too slow
+// 	mt19937 gen(seed);
+// 	uniform_real_distribution<> dis(min, max);
+// 	return dis(gen);
+// }
 float ValueNoise(float scale, float x, float y, int repeatDistance, int min, int max){
 	float localX = x/scale;
 	float localY = y/scale;

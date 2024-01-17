@@ -8,7 +8,7 @@
 #include <algorithm>
 
 
-Projectile::Projectile(Vector2 pos, Vector2 dir, float vel){
+Projectile::Projectile(Vector2 pos, Vector2 dir, float vel/*, int explosionRadius, int damage, int */){
 	position = pos;
 	direction = dir;
 	velocity = vel;
@@ -35,6 +35,6 @@ int Projectile::GetTileOffset(){
 	return 0;
 }
 void Projectile::OnCollision(Scene* scene){
-	scene->terrain->TerraformCircle(position, 7, -15);
+	scene->terrain->TerraformCircle(scene,position, 7, 1);
 	scene->RemoveProjectile(this);
 }

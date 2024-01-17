@@ -32,6 +32,7 @@ public:
 
 	Vector2 LoopCoord(Vector2 coord);
 	bool IsPlayerCollision(Vector2 coord);
+	float ClosestPlayerDistance(Vector2 coord);
 	void AddProjectile(shared_ptr<Projectile> projectile);
 	void RemoveProjectile(Projectile* projectile);
 	void NextTurn();

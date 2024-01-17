@@ -17,7 +17,7 @@ template<int TerrainSize>
 void GenerateTerrainData(float dataTarget[TerrainSize+1][TerrainSize+1]){
 	for(int i=0; i<TerrainSize+1;i++){
 		for(int j=0; j<TerrainSize+1;j++){
-			dataTarget[i][j] = ValueNoise(12,i,j,W_SIZE+1,0,100);
+			dataTarget[i][j] = ValueNoise(12,i,j,W_SIZE+1,0,100)/100;
 		}
 	}
 }
@@ -28,8 +28,8 @@ Scene::Scene(u16* associatedMemory){
 	float terrainData[W_SIZE+1][W_SIZE+1] = {0};
 	GenerateTerrainData<W_SIZE>(terrainData);
 
-	terrain = make_unique<Terrain>(terrainData);
-	terrain->MarchTerrainData(50);
+	terrain = make_unique<Terrain>(terrainData, 0.5);
+	terrain->MarchTerrainData();
 
 	players.push_back(make_shared<Player>(198,198));
 
@@ -115,6 +115,17 @@ bool Scene::IsPlayerCollision(Vector2 coord){
 		}
 	}
 	return false;
+}
+float Scene::ClosestPlayerDistance(Vector2 coord){
+	float minDistance = W_SIZE*W_SIZE;
+	for(shared_ptr<Player> player : players){
+		Vector2 delta = Vector2(player->position.x - coord.x, player->position.y - coord.y);
+		float distance = sqrt(delta.x*delta.x + delta.y*delta.y);
+		if(minDistance > distance){
+			minDistance = distance;
+		}
+	}
+	return minDistance;
 }
 void Scene::AddProjectile(shared_ptr<Projectile> projectile){
 	projectiles.push_back(projectile);
