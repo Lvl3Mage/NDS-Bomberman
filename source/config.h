@@ -1,1 +1,1 @@
-#define W_SIZE 256
+#define W_SIZE 128

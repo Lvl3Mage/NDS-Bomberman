@@ -19,6 +19,8 @@ Projectile::Projectile(Vector2 pos, Vector2 dir, float vel, int _startTile, floa
 	startTile = _startTile;
 	spread  = 1 / spread;
 	causeExplosion = _causeExplosion;
+	trajectoryTangentY = 0;
+	trajectoryTangentX = 0;
 	if(direction.y == 0){
 		trajectoryTangentY = RandomRange(-vel/spread, vel/spread);
 	}
@@ -63,12 +65,12 @@ void Projectile::OnCollision(Scene* scene){
 	vector<shared_ptr<Player>> players = scene->players;
 	for(int i = 0; i < players.size(); i++){
 		Vector2 delta = Vector2(players[i]->position.x - position.x, players[i]->position.y - position.y);
-		if(sqrt(delta.x*delta.x + delta.y*delta.y)){
+		if(sqrt(delta.x*delta.x + delta.y*delta.y) <= explosionRadius){
 			players[i]->Damage(playerDamage);
 		}
 	}
 	if(causeExplosion){
-		scene->AddExplosion(position, explosionRadius-1);
+		scene->AddExplosion(position, explosionRadius);
 	}
 	scene->terrain->TerraformCircle(scene,position, explosionRadius, terrainDamage);
 	scene->RemoveProjectile(this);

@@ -260,9 +260,7 @@ int main()
 	Init();
 	iprintf("\x1b[12;2H Loading Scene...");
 
-	scene = make_unique<Scene>(mapMemory);
-
-	iprintf("\x1b[12;2H Loaded!         ");
+	scene = make_unique<Scene>(mapMemory, ticks);
 
 	timerStart (0 , ClockDivider_1024 , 0 , NULL ) ; 
 	while(1)
@@ -271,6 +269,16 @@ int main()
 		scanKeys();
 		UpdateTime();
 		scene->Update();
+		if(scene->AlivePlayerCount() <=1){
+			u32 key = keysDown();
+			if(key & KEY_X){
+				consoleClear();
+				iprintf("\x1b[12;2H Loading Scene...");
+				scene = make_unique<Scene>(mapMemory, ticks);
+
+			}
+		}
+
 		swiWaitForVBlank();
 	}
 }

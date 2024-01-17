@@ -15,13 +15,13 @@ using namespace std;
 Explosion::Explosion(Vector2 pos, int rad){
 	position = pos;
 	radius = rad;
-	tileOffset = 8;
+	tileOffset = 7;
 }
 template<int TerrainSize>
-void GenerateTerrainData(float dataTarget[TerrainSize+1][TerrainSize+1]){
+void GenerateTerrainData(float dataTarget[TerrainSize+1][TerrainSize+1], int seed){
 	for(int i=0; i<TerrainSize+1;i++){
 		for(int j=0; j<TerrainSize+1;j++){
-			float weight = (ValueNoise(12,i,j,W_SIZE+1,0,100)/100); // 0-1
+			float weight = (ValueNoise(12,i+seed,j+seed,W_SIZE+1,0,100)/100); // 0-1
 			dataTarget[i][j] = weight; // 0 - 1
 		}
 	}
@@ -35,20 +35,25 @@ void Scene::UpdateExplosionData(){
 		}
 	}
 }
-Scene::Scene(u16* associatedMemory){
+Scene::Scene(u16* associatedMemory, int seed){
 
 	float terrainData[W_SIZE+1][W_SIZE+1] = {0};
-	GenerateTerrainData<W_SIZE>(terrainData);
+	GenerateTerrainData<W_SIZE>(terrainData, seed);
 
-	terrain = make_unique<Terrain>(terrainData, 0.5, 0.7, 0, 1);
+	terrain = make_unique<Terrain>(terrainData, 0.5, 0.8, 0, 1);
 	terrain->MarchTerrainData();
 
-	players.push_back(make_shared<Player>(198,198));
+	for(int i = 0; i < 2; i++){
+		while(true){
+			Vector2 coord = Vector2(RandomRange(0,W_SIZE),RandomRange(0,W_SIZE));
+			if(!terrain->IsTerrainAt(coord)){
+				players.push_back(make_shared<Player>(coord.x,coord.y));
+				break;
+			} 
+		}
+	}
 
-	players.push_back(make_shared<Player>(40,40));
-	//add players
-
-	cameraController = make_unique<CameraController>(associatedMemory,  128,128);
+	cameraController = make_unique<CameraController>(associatedMemory,  W_SIZE/2,W_SIZE/2);
 
 	NextTurn();
 }
@@ -66,22 +71,55 @@ void Scene::NextTurn(){
 	turnTimeLeft = 20;
 	players[activePlayerIndex]->ResetTurn();
 }
+void Scene::LogEndgame(){
+	vector<int> alivePlayers = GetAlivePlayerIndecies();
+	if(alivePlayers.size() == 0){
+		iprintf("\x1b[2;2H Draw!" );
+		iprintf("\x1b[16;2H Press X to restart");
+		return;
+	}
+
+	iprintf("\x1b[2;2H Player %d won!", alivePlayers[0]+1);
+	iprintf("\x1b[22;2H Press X to restart");
+}
 void Scene::LogSceneInfo(){
 	iprintf("\x1b[2;2H Player %d's turn!", activePlayerIndex+1);
 	iprintf("\x1b[4;2H Time left: %d seconds", (int)ceil(turnTimeLeft));
 	iprintf("\x1b[6;2H Remaining movement: %d cells", players[activePlayerIndex]->remainingMovement);
 	iprintf("\x1b[8;2H Remaining actions: %d", players[activePlayerIndex]->remainingActions);
 	iprintf("\x1b[10;2H Selected action: %s", players[activePlayerIndex]->GetSelectedActionName());
+	iprintf("\x1b[12;2H Health remaining: %d", players[activePlayerIndex]->health);
+
+
+	iprintf("\x1b[18;2H Controlls:");
+
+	iprintf("\x1b[20;2H L - Grenades, R - Walls");
+	iprintf("\x1b[22;2H A - Move, X - Skip turn");
+}
+vector<int> Scene::GetAlivePlayerIndecies(){
+	vector<int> alivePlayers;
+	for(int i = 0; i < players.size(); i++){
+		if(players[i]->health > 0){
+			alivePlayers.push_back(i);
+		}
+	}
+	return alivePlayers;
+}
+int Scene::AlivePlayerCount(){
+	int count = 0;
+	for(int i = 0; i < players.size(); i++){
+		if(players[i]->health > 0){
+			count++;
+		}
+	}
+	return count;
+
 }
 void Scene::Update(){
 	deltaTime = sceneTime - lastFrameTime;
 
 
 	turnTimeLeft -= deltaTime;
-
-	if(turnTimeLeft <= 0){
-		NextTurn();
-	}
 
 	if(lastExplosionUpdateTime + explosionAnimTime < sceneTime){
 		lastExplosionUpdateTime = sceneTime;
@@ -90,18 +128,31 @@ void Scene::Update(){
 
 
 
-	players[activePlayerIndex]->ActiveUpdate(this);
+	if(AlivePlayerCount() > 1){
 
-	for(int i = 0; i < players.size(); i++){
-		players[i]->PassiveUpdate(this);
+		if(turnTimeLeft <= 0){
+			NextTurn();
+		}
+
+		players[activePlayerIndex]->ActiveUpdate(this);
+
+		for(int i = 0; i < players.size(); i++){
+			players[i]->PassiveUpdate(this);
+		}
+
+		for(int i = 0; i < projectiles.size(); i++){
+			projectiles[i]->Update(this);
+		}
+		LogSceneInfo();
+	}
+	else{
+		LogEndgame();
+		vector<int> alivePlayers = GetAlivePlayerIndecies();
+		if(alivePlayers.size() > 0){
+			activePlayerIndex = alivePlayers[0];
+		}
 	}
 
-	for(int i = 0; i < projectiles.size(); i++){
-		projectiles[i]->Update(this);
-	}
-
-
-	LogSceneInfo();
 
 	cameraController->Update(this);
 	cameraController->Render(this);

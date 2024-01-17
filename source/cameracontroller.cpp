@@ -27,7 +27,9 @@ bool CameraController::IsCoordInFrame(Vector2 coord){
 bool CameraController::IsCoordInFrame(Vector2 coord, int frameDistance){
 	return (coord.x >= -frameDistance) && (coord.x < camWidth+frameDistance) && (coord.y >= -frameDistance) && (coord.y < camHeight+frameDistance);
 }
-void CameraController::Render(Scene* scene){
+void CameraController::Render(Scene* scene){ 
+	// It seems so much screen writing causes screen tearing at the top of the screen
+	// I haven't been able to figure out how to fix this yet...
 	Vector2 screenPos = GetCornerPosition();
 	//World Pass BG
 	for (int screenY = 0; screenY < camHeight; screenY++)
@@ -62,31 +64,28 @@ void CameraController::Render(Scene* scene){
 		int screenCoordX = explosion->position.x - screenPos.x;
 		int screenCoordY = explosion->position.y - screenPos.y;
 		if(IsCoordInFrame(Vector2(screenCoordX, screenCoordY),explosion->radius)){
-			for (int screenY = screenCoordY - explosion->radius; screenY < screenCoordY + explosion->radius; screenY++)
+			for (int screenY = max(screenCoordY - explosion->radius,0); screenY < min(screenCoordY + explosion->radius,camHeight); screenY++)
 			{
-				for (int screenX = screenCoordX - explosion->radius; screenX < screenCoordX + explosion->radius; screenX++)
+				for (int screenX = max(screenCoordX - explosion->radius,0); screenX < min(screenCoordX + explosion->radius,camWidth); screenX++)
 				{
 					Vector2 worldCoord = Vector2(screenX+screenPos.x, screenY+screenPos.y);
 					Vector2 delta = Vector2(worldCoord.x - explosion->position.x, worldCoord.y - explosion->position.y);
-					if(IsCoordInFrame(Vector2(screenX,screenY))){
-						if(sqrt(delta.x*delta.x + delta.y*delta.y) < explosion->radius){
-							int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
-							int tileOffset =  explosion->tileOffset;
-							screenMemory[pos_mapMemory] = explosionTiles + tileOffset;
-						}
-						
+					if(sqrt(delta.x*delta.x + delta.y*delta.y) < explosion->radius){
+						int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
+						int tileOffset =  explosion->tileOffset;
+						screenMemory[pos_mapMemory] = explosionTiles + tileOffset;
 					}
 				}
 			}
 		}
 	}
 
-	//World Pass BG
+	//World Pass Walls
 	for (int screenY = 0; screenY < camHeight; screenY++)
 	{
 		for (int screenX = 0; screenX < camWidth; screenX++)
 		{
-			Vector2 worldCoord = Vector2(screenX+screenPos.x, screenY+screenPos.y);
+			Vector2 worldCoord = Vector2(screenX + screenPos.x, screenY + screenPos.y);
 			int pos_mapMemory = ScreenCoordToIndex(screenX,screenY);
 			if(scene->terrain->IsTerrainAt(worldCoord)){
 				screenMemory[pos_mapMemory] = scene->terrain->GetTerrainAt(worldCoord);
@@ -135,7 +134,7 @@ void CameraController::Update(Scene* scene){
 
 		const float slope = 1.8;
 		const float tPow = pow(t,slope);
-		t = tPow / (tPow + pow(1-t,slope));
+		t = tPow / (tPow + pow(1-t,slope)); //  S curve slope
 		int posX = round(lerp(lerpStart.x, targetPlayer->position.x, t));
 		int posY = round(lerp(lerpStart.y, targetPlayer->position.y, t));
 		SetPosition(Vector2(posX,posY));

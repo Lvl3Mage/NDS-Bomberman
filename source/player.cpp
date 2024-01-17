@@ -32,7 +32,9 @@ Player::Player(int startX, int startY){
 	activeTile = playerTiles;
 }
 void Player::ActiveUpdate(Scene* scene){
-
+	if(health <= 0){
+		return;
+	}
 
 
 	u32 key;
@@ -79,7 +81,7 @@ void Player::ProcessAttack(Scene* scene){
 		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, grenadeTiles, 0.3, 6, -0.25, 1, true);
 	}
 	else if(selectedActionType == 2){
-		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, mudBallTiles, 0.1, 3, 1, 0, false);
+		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, mudBallTiles, 0.1, 4, 1, 0, false);
 	}
 
 	scene->AddProjectile(projectile);
@@ -100,12 +102,13 @@ void Player::ProcessMovement(Scene* scene){
 	if(moveDelta.x == 0 && moveDelta.y == 0){
 		return;	
 	}
-	lastMoveTime = scene->sceneTime;
-	remainingMovement--;
+	
 
 	Vector2 nextPos = Vector2(moveDelta.x + position.x, moveDelta.y + position.y);
 	nextPos = scene->LoopCoord(nextPos);
 
+	
+	Vector2 pastPosition = position;
 	if(!scene->terrain->IsTerrainAt(Vector2(nextPos.x, position.y))){
 		position.x = nextPos.x;
 	}
@@ -115,6 +118,13 @@ void Player::ProcessMovement(Scene* scene){
 		position.y = nextPos.y;
 	}
 	moveDelta.y = 0;
+
+
+	//moved
+	if(pastPosition.x != position.x || pastPosition.y != position.y){
+		lastMoveTime = scene->sceneTime;
+		remainingMovement--;
+	}
 }
 void Player::PassiveUpdate(Scene* scene){
 }
@@ -130,7 +140,7 @@ char* Player::GetSelectedActionName(){
 		case 1:
 			return "Grenades";
 		case 2:
-			return "Wall building";
+			return "Walls";
 	}
 	return "Other";
 }

@@ -24,7 +24,7 @@ class Scene
 	float lastFrameTime;
 	void LogSceneInfo();
 public:
-	Scene(u16* associatedMemory);
+	Scene(u16* associatedMemory, int seed);
 	vector<shared_ptr<Player>> players;
 	vector<shared_ptr<Projectile>> projectiles;
 	unique_ptr<CameraController> cameraController;
@@ -47,5 +47,8 @@ public:
 	const float explosionAnimTime = 0.1;
 	void UpdateExplosionData();
 	void AddExplosion(Vector2 position, int radius);
+	int AlivePlayerCount();
+	void LogEndgame();
+	vector<int> GetAlivePlayerIndecies();
 };
 #endif
