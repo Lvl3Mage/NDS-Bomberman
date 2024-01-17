@@ -2,27 +2,30 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
-// #include <random>
+#include <random>
 
 using namespace std;
 
-
+float randZeroToOne()
+{
+	static std::default_random_engine e;
+    static std::uniform_real_distribution<> dis(0, 1); // range [0, 1)
+    return dis(e);
+}
 float lerp(float a, float b, float t)
 {
     return a + (b - a) * t;
 }
 int RandomRange(int min, int max){
-	return min + rand() % (max + 1);
+	return min + rand() % ((max-min) + 1);
+}
+float RandomRange(float min, float max){
+	return min + randZeroToOne()*(max-min);
 }
 int RandomRangeSeeded(int min, int max, int seed){
 	srand(static_cast<unsigned int>(seed));
-	return min + rand() % (max + 1);
+	return min + rand() % ((max-min) + 1);
 }
-// float RandomRangeSeeded(float min, float max, int seed){//Waay too slow
-// 	mt19937 gen(seed);
-// 	uniform_real_distribution<> dis(min, max);
-// 	return dis(gen);
-// }
 float ValueNoise(float scale, float x, float y, int repeatDistance, int min, int max){
 	float localX = x/scale;
 	float localY = y/scale;
@@ -45,4 +48,7 @@ float ValueNoise(float scale, float x, float y, int repeatDistance, int min, int
 	float bottom = lerp((float)RandomRangeSeeded(min,max,posIndex),(float)RandomRangeSeeded(min,max,posIndexR), xTravel);
 	float top = lerp((float)RandomRangeSeeded(min,max,posIndexT),(float)RandomRangeSeeded(min,max,posIndexTR), xTravel);
 	return lerp(top,bottom,yTravel);
+}
+int sign(float val) {
+    return (0 < val) - (val < 0);
 }

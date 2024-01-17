@@ -12,6 +12,7 @@
 
 #include "utils.h"
 #include "config.h"
+#include "tileconfig.h"
 
 #include <cstdlib>
 #include <time.h>
@@ -27,7 +28,11 @@ static u16* mapMemory;
 # define TIMER_SPEED ( BUS_CLOCK /1024)
 
 int WALL_TILES_INDEX;
-
+int terrainTiles1;
+int terrainTiles2;
+int playerTiles;
+int grenadeTiles;
+int mudBallTiles;
 unique_ptr<Scene> scene;
 uint ticks = 0;
 void UpdateTime(){
@@ -102,17 +107,26 @@ void Init(){
 	BG_PALETTE[2]=RGB15(12,10,7);
 	BG_PALETTE[3]=RGB15(10,9,7);
 
+	BG_PALETTE[4]=RGB15(14,12,9);
+	BG_PALETTE[5]=RGB15(9,7,5);
+	BG_PALETTE[6]=RGB15(7,6,5);
 
-	BG_PALETTE[4]=RGB15(10,10,10);
-	BG_PALETTE[5]=RGB15(15,15,15);
-	BG_PALETTE[6]=RGB15(19,19,19);
-	BG_PALETTE[7]=RGB15(15,10,7);
-	BG_PALETTE[8]=RGB15(10,4,2);
-	BG_PALETTE[9]=RGB15(0,0,0);
+
+	BG_PALETTE[7]=RGB15(10,10,10);
+	BG_PALETTE[8]=RGB15(15,15,15);
+	BG_PALETTE[9]=RGB15(19,19,19);
+	BG_PALETTE[10]=RGB15(15,10,7);
+	BG_PALETTE[11]=RGB15(10,4,2);
+	BG_PALETTE[12]=RGB15(0,0,0);
 	// BG_PALETTE[4]=RGB15(10,31,10);
-	BG_PALETTE[10]=RGB15(10,10,10);
-	BG_PALETTE[11]=RGB15(17,17,17);
-	BG_PALETTE[12]=RGB15(7,7,7);
+	//Grenades
+	BG_PALETTE[13]=RGB15(10,10,10);
+	BG_PALETTE[14]=RGB15(17,17,17);
+	BG_PALETTE[15]=RGB15(7,7,7);
+	//Mud ball
+	BG_PALETTE[16]=RGB15(17, 15, 12);
+	BG_PALETTE[17]=RGB15(12, 10, 7);
+	BG_PALETTE[18]=RGB15(10, 9, 7);
 
 	ApplyPalette({w_empty, w_full, w_corner1, w_halfH, w_halfV, w_fullCorner1,w_path},0);
 
@@ -141,12 +155,11 @@ void Init(){
 	static u8 w_path_inv[64];
 	MirrorY(w_path,w_path_inv);
 
-	ApplyPalette({dwarf},4);
 
 	//This took forever to figure out but it seems that dmaCopy works asyncrounosly? 
 	//if the variables that you pass in are not static and aren't allocated on the heap they go out of scope before it executes
 	//I swear this was not like this before but like this it will stay
-	DefineTiles({
+	terrainTiles1 = DefineTiles({
 		w_empty,     corner3, corner4, w_halfH_inv,
 		corner2,     w_halfV_inv, w_path, w_fullCorner1,
 		w_corner1,     w_path_inv, w_halfV, w_fullCorner2, 
@@ -154,27 +167,33 @@ void Init(){
 	});//15
 
 
+	ApplyPalette({dwarf},7);
 	//player
-	DefineTiles({dwarf});//16
+	playerTiles = DefineTiles({dwarf});//16
 
 
 	//Projectiles
-	ApplyPalette({grenade_H, grenade_H_inv,grenade_V,grenade_V_inv},10);
+	ApplyPalette({grenade_H, grenade_H_inv,grenade_V,grenade_V_inv},13);
 
-	DefineTiles({grenade_H, grenade_H_inv,grenade_V,grenade_V_inv});//21
-}
-template<int TerrainSize>
-void GenerateTerrainData(int dataTarget[TerrainSize+1][TerrainSize+1]){
-	for(int i=0; i<TerrainSize+1;i++){
-		for(int j=0; j<TerrainSize+1;j++){
-			dataTarget[i][j] = ValueNoise(12,i,j,W_SIZE+1,0,100);
-		}
-	}
+	grenadeTiles = DefineTiles({grenade_H, grenade_H_inv,grenade_V,grenade_V_inv});//21
+
+
+	ApplyPalette({mud_ball1},16);
+	static u8 mud_ball2[64];
+	MirrorX(mud_ball1,mud_ball2);
+	static u8 mud_ball3[64];
+	MirrorY(mud_ball2,mud_ball3);
+	static u8 mud_ball4[64];
+	MirrorY(mud_ball1,mud_ball4);
+
+
+	mudBallTiles = DefineTiles({mud_ball1, mud_ball2, mud_ball3, mud_ball4});
 }
 
 
 int main()
 {
+
 	srand(static_cast<unsigned int>(time(0)));
 	Init();
 	iprintf("\x1b[12;2H Loading Scene...");

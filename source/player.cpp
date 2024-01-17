@@ -1,6 +1,7 @@
 #include "player.h"
 #include "terrain.h"
 #include "config.h"
+#include "tileconfig.h"
 #include "utils.h"
 #include "scene.h"
 #include "projectile.h"
@@ -28,6 +29,7 @@ Vector2 GetActionDir(u32 key){
 }
 Player::Player(int startX, int startY){
 	position = Vector2(startX, startY);
+	activeTile = playerTiles;
 }
 void Player::ActiveUpdate(Scene* scene){
 
@@ -41,6 +43,9 @@ void Player::ActiveUpdate(Scene* scene){
 	if(key & KEY_L){//grenades
 		selectedActionType = 1;
 	}
+	if(key & KEY_R){//wall building
+		selectedActionType = 2;
+	}
 	if(key & KEY_X){//skip turn
 		scene->NextTurn();
 	}
@@ -51,6 +56,7 @@ void Player::ActiveUpdate(Scene* scene){
 			ProcessMovement(scene);
 			break;
 		case 1:
+		case 2:
 			ProcessAttack(scene);
 			break;
 	}
@@ -67,7 +73,15 @@ void Player::ProcessAttack(Scene* scene){
 	}
 
 	remainingActions --;
-	shared_ptr<Projectile> projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5);
+	shared_ptr<Projectile> projectile;
+
+	if(selectedActionType == 1){
+		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, grenadeTiles, 0.3, 6, -1, 1);
+	}
+	else if(selectedActionType == 2){
+		projectile = make_shared<Projectile>(Vector2(position.x+actionDir.x, position.y+actionDir.y), actionDir, 5, mudBallTiles, 0.1, 3, 1, 0);
+	}
+
 	scene->AddProjectile(projectile);
 
 }
@@ -115,6 +129,21 @@ char* Player::GetSelectedActionName(){
 			return "Move";
 		case 1:
 			return "Grenades";
+		case 2:
+			return "Wall building";
 	}
 	return "Other";
+}
+void Player::Damage(int damage){
+	if(health<= 0){
+		return;
+	}
+	health -= damage;
+	health = max(health,0);
+	if(health <= 0){
+		OnDeath();
+	}
+}
+void Player::OnDeath(){
+
 }

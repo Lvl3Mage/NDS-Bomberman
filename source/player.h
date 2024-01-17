@@ -18,10 +18,11 @@ class Player
 	void ProcessAttack(Scene* scene);
 	void ProcessMovement(Scene* scene);
 public:
+	int health = 3;
 	int remainingActions;
 	int remainingMovement;
 	Vector2 position = Vector2(0,0);
-	u8 activeTile = 16;
+	u8 activeTile;
 
 
 	float lastMoveTime = 0;
@@ -33,5 +34,7 @@ public:
 	void ActiveUpdate(Scene* scene);
 	void ResetTurn();
 	char* GetSelectedActionName();
+	void Damage(int damage);
+	void OnDeath();
 };
 #endif
