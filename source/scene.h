@@ -16,11 +16,11 @@ class Scene
 {
 	float turnTimeLeft;
 	float lastFrameTime;
-	void SwitchNextTurn();
 	void LogSceneInfo();
 public:
 	Scene(u16* associatedMemory);
 	vector<shared_ptr<Player>> players;
+	vector<shared_ptr<Projectile>> projectiles;
 	unique_ptr<CameraController> cameraController;
 	unique_ptr<Terrain> terrain;
 	float sceneTime;
@@ -32,5 +32,8 @@ public:
 
 	Vector2 LoopCoord(Vector2 coord);
 	bool IsPlayerCollision(Vector2 coord);
+	void AddProjectile(shared_ptr<Projectile> projectile);
+	void RemoveProjectile(Projectile* projectile);
+	void NextTurn();
 };
 #endif

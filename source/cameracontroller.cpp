@@ -45,6 +45,17 @@ void CameraController::Render(Scene* scene){
 			screenMemory[pos_mapMemory] = players[i]->activeTile;
 		}
 	}
+
+	//Projectile pass
+	vector<shared_ptr<Projectile>> projectiles = scene->projectiles;
+	for(int i = 0; i < projectiles.size(); i++){
+		int screenCoordX = projectiles[i]->position.x - screenPos.x;
+		int screenCoordY = projectiles[i]->position.y - screenPos.y;
+		if(IsCoordInFrame(Vector2(screenCoordX, screenCoordY))){
+			int pos_mapMemory = ScreenCoordToIndex(screenCoordX,screenCoordY);
+			screenMemory[pos_mapMemory] = projectiles[i]->activeTile;
+		}
+	}
 }
 void CameraController::ClampPosition(){
 	position.x = clamp(position.x, camWidth/2, W_SIZE - camWidth/2);

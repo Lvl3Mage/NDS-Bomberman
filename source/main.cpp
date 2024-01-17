@@ -110,6 +110,9 @@ void Init(){
 	BG_PALETTE[8]=RGB15(10,4,2);
 	BG_PALETTE[9]=RGB15(0,0,0);
 	// BG_PALETTE[4]=RGB15(10,31,10);
+	BG_PALETTE[10]=RGB15(10,10,10);
+	BG_PALETTE[11]=RGB15(17,17,17);
+	BG_PALETTE[12]=RGB15(7,7,7);
 
 	ApplyPalette({w_empty, w_full, w_corner1, w_halfH, w_halfV, w_fullCorner1,w_path},0);
 
@@ -148,9 +151,17 @@ void Init(){
 		corner2,     w_halfV_inv, w_path, w_fullCorner1,
 		w_corner1,     w_path_inv, w_halfV, w_fullCorner2, 
 		w_halfH, w_fullCorner4, w_fullCorner3, w_full,
-	});
-	//15
-	DefineTiles({dwarf});
+	});//15
+
+
+	//player
+	DefineTiles({dwarf});//16
+
+
+	//Projectiles
+	ApplyPalette({grenade_H, grenade_H_inv,grenade_V,grenade_V_inv},10);
+
+	DefineTiles({grenade_H, grenade_H_inv,grenade_V,grenade_V_inv});//21
 }
 template<int TerrainSize>
 void GenerateTerrainData(int dataTarget[TerrainSize+1][TerrainSize+1]){
@@ -176,6 +187,7 @@ int main()
 	while(1)
 	{
     	consoleClear();
+		scanKeys();
 		UpdateTime();
 		scene->Update();
 		swiWaitForVBlank();

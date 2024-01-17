@@ -95,3 +95,50 @@ u8 dwarf[64]=
 };
 
 
+u8 grenade_H[64]=
+{
+    b,b,b,b,b,b,b,b,
+    b,b,b,b,b,b,b,b,
+    b,0,0,1,1,1,b,b,
+    b,0,0,0,0,0,1,b,
+    b,2,0,0,0,0,0,b,
+    b,2,2,2,0,0,b,b,
+    b,b,b,b,b,b,b,b,
+    b,b,b,b,b,b,b,b
+};
+u8 grenade_H_inv[64]=
+{
+    b,b,b,b,b,b,b,b,
+    b,b,b,b,b,b,b,b,
+    b,b,0,0,1,1,1,b,
+    b,0,0,0,0,0,1,b,
+    b,2,0,0,0,0,0,b,
+    b,b,2,2,0,0,0,b,
+    b,b,b,b,b,b,b,b,
+    b,b,b,b,b,b,b,b
+};
+u8 grenade_V[64]=
+{
+    b,b,b,b,b,b,b,b,
+    b,b,b,0,1,b,b,b,
+    b,b,0,0,0,1,b,b,
+    b,b,0,0,0,1,b,b,
+    b,b,2,0,0,1,b,b,
+    b,b,2,0,0,0,b,b,
+    b,b,2,2,0,0,b,b,
+    b,b,b,b,b,b,b,b
+};
+u8 grenade_V_inv[64]=
+{
+    b,b,b,b,b,b,b,b,
+    b,b,0,0,1,1,b,b,
+    b,b,0,0,0,1,b,b,
+    b,b,0,0,0,1,b,b,
+    b,b,2,0,0,1,b,b,
+    b,b,2,0,0,0,b,b,
+    b,b,b,2,0,b,b,b,
+    b,b,b,b,b,b,b,b
+};
+
+
+

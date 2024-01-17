@@ -15,8 +15,8 @@ class Player
 	//0 -> movement
 	//1 -> grenades
 
-	void ProcessAttack(Scene* scene, Vector2 actionDir);
-	void ProcessMovement(Scene* scene, Vector2 actionDir);
+	void ProcessAttack(Scene* scene);
+	void ProcessMovement(Scene* scene);
 public:
 	int remainingActions;
 	int remainingMovement;

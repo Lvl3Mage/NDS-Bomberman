@@ -7,13 +7,15 @@
 
 class Terrain
 {
-    int terrainData[W_SIZE+1][W_SIZE+1] = {0};
+    float terrainData[W_SIZE+1][W_SIZE+1] = {0};
     int terrainTiles[W_SIZE][W_SIZE];
 
 public:
-    Terrain(int data[W_SIZE+1][W_SIZE+1]);
-    void MarchTerrainData(int surfaceLevel);
+    Terrain(float data[W_SIZE+1][W_SIZE+1]);
+    void MarchTerrainData(float surfaceLevel);
+    void MarchTerrainDataRegion(Vector2 start, Vector2 end, float surfaceLevel);
     int GetTerrainAt(Vector2 coord);
     bool IsTerrainAt(Vector2 coord);
+    void TerraformCircle(Vector2 center, int radius, int amount );
 };
 #endif

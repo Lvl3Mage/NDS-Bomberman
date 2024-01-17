@@ -10,6 +10,7 @@ class Projectile;
 
 class Projectile{
 	float accumulatedDistance = 0;
+	int GetTileOffset();
 public:
 	Projectile(Vector2 coord, Vector2 dir, float vel);
 	Vector2 position = Vector2(0,0);

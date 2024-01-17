@@ -14,7 +14,7 @@ using namespace std;
 
 
 template<int TerrainSize>
-void GenerateTerrainData(int dataTarget[TerrainSize+1][TerrainSize+1]){
+void GenerateTerrainData(float dataTarget[TerrainSize+1][TerrainSize+1]){
 	for(int i=0; i<TerrainSize+1;i++){
 		for(int j=0; j<TerrainSize+1;j++){
 			dataTarget[i][j] = ValueNoise(12,i,j,W_SIZE+1,0,100);
@@ -25,7 +25,7 @@ void GenerateTerrainData(int dataTarget[TerrainSize+1][TerrainSize+1]){
 
 Scene::Scene(u16* associatedMemory){
 
-	int terrainData[W_SIZE+1][W_SIZE+1] = {0};
+	float terrainData[W_SIZE+1][W_SIZE+1] = {0};
 	GenerateTerrainData<W_SIZE>(terrainData);
 
 	terrain = make_unique<Terrain>(terrainData);
@@ -38,13 +38,13 @@ Scene::Scene(u16* associatedMemory){
 
 	cameraController = make_unique<CameraController>(associatedMemory,  128,128);
 
-	SwitchNextTurn();
+	NextTurn();
 }
 
 void Scene::UpdateTime(float newTime){
 	sceneTime = newTime;
 }
-void Scene::SwitchNextTurn(){
+void Scene::NextTurn(){
 
 	activePlayerIndex += 1;
 	if(activePlayerIndex >= players.size()){
@@ -68,7 +68,7 @@ void Scene::Update(){
 	turnTimeLeft -= deltaTime;
 
 	if(turnTimeLeft <= 0){
-		SwitchNextTurn();
+		NextTurn();
 	}
 
 
@@ -77,6 +77,10 @@ void Scene::Update(){
 
 	for(int i = 0; i < players.size(); i++){
 		players[i]->PassiveUpdate(this);
+	}
+
+	for(int i = 0; i < projectiles.size(); i++){
+		projectiles[i]->Update(this);
 	}
 
 
@@ -111,4 +115,15 @@ bool Scene::IsPlayerCollision(Vector2 coord){
 		}
 	}
 	return false;
+}
+void Scene::AddProjectile(shared_ptr<Projectile> projectile){
+	projectiles.push_back(projectile);
+}
+void Scene::RemoveProjectile(Projectile* projectile){//Not the best way to do this but it'll do 
+	for(int i=0; i<projectiles.size(); i++){
+		if(projectiles[i].get() == projectile){
+			projectiles.erase(projectiles.begin()+i);
+			return;
+		}
+	}
 }
