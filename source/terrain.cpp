@@ -28,18 +28,7 @@ uint GetSquareConfig(float data[TerrainSize+1][TerrainSize+1], int x, int y, flo
 	return squareConfig;
 }
 template<int TerrainSize>
-void SquareMarch(float data[TerrainSize+1][TerrainSize+1], int target[TerrainSize][TerrainSize], float surfaceLevel, float heavyLevel){
-	
-	for(int i=0; i<TerrainSize;i++){
-		for(int j=0; j<TerrainSize;j++){
-			uint tileIndex = GetSquareConfig<TerrainSize>(data, i, j, surfaceLevel,heavyLevel);
-			target[i][j] = tileIndex;
-		}
-	}
-}
-template<int TerrainSize>
 void SquareMarchRegion(Vector2 start, Vector2 end, float data[TerrainSize+1][TerrainSize+1], int target[TerrainSize][TerrainSize], float surfaceLevel, float heavyLevel){
-
 	start.x = clamp(start.x-1,0,TerrainSize);
 	start.y = clamp(start.y-1,0,TerrainSize);
 	end.x = clamp(end.x+1,0,TerrainSize);
@@ -51,7 +40,10 @@ void SquareMarchRegion(Vector2 start, Vector2 end, float data[TerrainSize+1][Ter
 		}
 	}
 }
-
+template<int TerrainSize>
+void SquareMarch(float data[TerrainSize+1][TerrainSize+1], int target[TerrainSize][TerrainSize], float surfaceLevel, float heavyLevel){
+	SquareMarchRegion<TerrainSize>(Vector2(0,0), Vector2(TerrainSize, TerrainSize), data,target, surfaceLevel,heavyLevel);
+}
 
 Terrain::Terrain(float data[W_SIZE+1][W_SIZE+1], float _surfaceLevel, float _heavyLevel, float _minTerrain, float _maxTerrain){
 	for(int i=0; i<W_SIZE+1;i++){

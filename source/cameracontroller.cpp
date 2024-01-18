@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "cameracontroller.h"
 #include "terrain.h"
@@ -27,11 +26,7 @@ bool CameraController::IsCoordInFrame(Vector2 coord){
 bool CameraController::IsCoordInFrame(Vector2 coord, int frameDistance){
 	return (coord.x >= -frameDistance) && (coord.x < camWidth+frameDistance) && (coord.y >= -frameDistance) && (coord.y < camHeight+frameDistance);
 }
-void CameraController::Render(Scene* scene){ 
-	// It seems so much screen writing causes screen tearing at the top of the screen
-	// I haven't been able to figure out how to fix this yet...
-	Vector2 screenPos = GetCornerPosition();
-	//World Pass BG
+void CameraController::DrawBG(Vector2 screenPos, Scene* scene){
 	for (int screenY = 0; screenY < camHeight; screenY++)
 	{
 		for (int screenX = 0; screenX < camWidth; screenX++)
@@ -43,12 +38,8 @@ void CameraController::Render(Scene* scene){
 			}
 		}
 	}
-
-	
-
-	
-
-	//Explosive pass
+}
+void CameraController::DrawExplosions(Vector2 screenPos, Scene* scene){
 	vector<shared_ptr<Explosion>> explosions = scene->explosions;
 	for(int i = 0; i < explosions.size(); i++){
 		shared_ptr<Explosion> explosion = explosions[i];
@@ -72,7 +63,8 @@ void CameraController::Render(Scene* scene){
 			}
 		}
 	}
-	//Projectile pass
+}
+void CameraController::DrawProjectiles(Vector2 screenPos, Scene* scene){
 	vector<shared_ptr<Projectile>> projectiles = scene->projectiles;
 	for(int i = 0; i < projectiles.size(); i++){
 		int screenCoordX = projectiles[i]->position.x - screenPos.x;
@@ -82,7 +74,8 @@ void CameraController::Render(Scene* scene){
 			screenMemory[pos_mapMemory] = projectiles[i]->activeTile;
 		}
 	}
-	//World Pass Walls
+}
+void CameraController::DrawWalls(Vector2 screenPos, Scene* scene){
 	for (int screenY = 0; screenY < camHeight; screenY++)
 	{
 		for (int screenX = 0; screenX < camWidth; screenX++)
@@ -94,8 +87,8 @@ void CameraController::Render(Scene* scene){
 			}
 		}
 	}
-
-	//Player pass
+}
+void CameraController::DrawPlayers(Vector2 screenPos, Scene* scene){
 	vector<shared_ptr<Player>> players = scene->players;
 	for(int i = 0; i < players.size(); i++){
 		int screenCoordX = players[i]->position.x - screenPos.x;
@@ -105,6 +98,25 @@ void CameraController::Render(Scene* scene){
 			screenMemory[pos_mapMemory] = players[i]->activeTile;
 		}
 	}
+}
+void CameraController::Render(Scene* scene){ 
+	// It seems so much screen writing causes screen tearing at the top of the screen
+	// I haven't been able to figure out how to fix this yet...
+	Vector2 screenPos = GetCornerPosition();
+	//World Pass BG
+	DrawBG(screenPos, scene);
+
+	//Explosive pass
+	DrawExplosions(screenPos, scene);
+
+	//Projectile pass
+	DrawProjectiles(screenPos, scene);
+
+	//World Pass Walls
+	DrawWalls(screenPos, scene);
+
+	//Player pass
+	DrawPlayers(screenPos, scene);
 }
 void CameraController::ClampPosition(){
 	position.x = clamp(position.x, camWidth/2, W_SIZE - camWidth/2);

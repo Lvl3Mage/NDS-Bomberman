@@ -44,8 +44,7 @@ void UpdateTime(){
 	scene->UpdateTime(ellapsedTime);
 	// scene->terrain->MarchTerrainData(50 + round(25*sin(ellapsedTime)));
 }
-void ApplyPalette(vector<u8*> tiles, int start){//0 - 10 to start - start+10, 10> - 0>
-
+void ApplyPalette(vector<u8*> tiles, int start){//0 - 10 to start - start+10, 10-> - 0->
 	for(int i = 0; i < tiles.size(); i++){
 		u8* tile = tiles[i];
 		for(int j = 0; j < 64; j++){

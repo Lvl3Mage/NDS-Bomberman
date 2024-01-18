@@ -14,6 +14,7 @@ class Player
 	int selectedActionType = 0;
 	//0 -> movement
 	//1 -> grenades
+	//2 -> walls
 
 	void ProcessAttack(Scene* scene);
 	void ProcessMovement(Scene* scene);

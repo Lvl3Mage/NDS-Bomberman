@@ -33,6 +33,12 @@ class CameraController
 	void UpdateTarget(Scene* scene);
 	int ScreenCoordToIndex(int x, int y);
 	void SetPosition(Vector2 newPos);
+
+	void DrawBG(Vector2 screenPos, Scene* scene);
+	void DrawExplosions(Vector2 screenPos, Scene* scene);
+	void DrawProjectiles(Vector2 screenPos, Scene* scene);
+	void DrawWalls(Vector2 screenPos, Scene* scene);
+	void DrawPlayers(Vector2 screenPos, Scene* scene);
 public:
 
 	CameraController(u16* attachedMapMemory, int posX, int posY);
